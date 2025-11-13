@@ -1,0 +1,1078 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OAuth 2.0 Flow: Advisor Portal Integration</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #dbeafe 0%, #e0e7ff 100%);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
+            color: white;
+            padding: 1.5rem;
+        }
+        
+        .header h1 {
+            font-size: 1.875rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        
+        .header p {
+            color: #bfdbfe;
+            font-size: 0.875rem;
+        }
+        
+        .progress-bar {
+            background: #f9fafb;
+            padding: 1rem 1.5rem;
+        }
+        
+        .progress-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .progress-step {
+            display: flex;
+            align-items: center;
+        }
+        
+        .step-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .step-circle {
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.875rem;
+        }
+        
+        .step-circle.completed {
+            background: #22c55e;
+            color: white;
+        }
+        
+        .step-circle.current {
+            background: #2563eb;
+            color: white;
+        }
+        
+        .step-circle.pending {
+            background: #d1d5db;
+            color: #6b7280;
+        }
+        
+        .step-title {
+            font-size: 0.75rem;
+            margin-top: 0.5rem;
+            text-align: center;
+            max-width: 6rem;
+            font-weight: 500;
+        }
+        
+        .progress-line {
+            width: 3rem;
+            height: 0.25rem;
+            margin: 0 0.5rem;
+        }
+        
+        .progress-line.completed {
+            background: #22c55e;
+        }
+        
+        .progress-line.pending {
+            background: #d1d5db;
+        }
+        
+        .step-wrapper.inactive {
+            opacity: 0.3;
+        }
+        
+        .content {
+            padding: 2rem;
+            min-height: 24rem;
+        }
+        
+        .footer {
+            background: #f9fafb;
+            padding: 1.5rem 2rem;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .footer-text {
+            font-size: 0.875rem;
+            color: #4b5563;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 0.75rem;
+        }
+        
+        .btn {
+            padding: 0.5rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .btn-primary {
+            background: #2563eb;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+        
+        .btn-secondary {
+            background: #e5e7eb;
+            color: #1f2937;
+        }
+        
+        .btn-secondary:hover {
+            background: #d1d5db;
+        }
+        
+        .login-box {
+            max-width: 28rem;
+            margin: 0 auto;
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 0.5rem;
+            padding: 2rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .logo-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .logo {
+            width: 4rem;
+            height: 4rem;
+            background: #2563eb;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.5rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .form-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 0.5rem 1rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            background: #f9fafb;
+            font-size: 0.875rem;
+        }
+        
+        .info-box {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            font-size: 0.875rem;
+            color: #1e40af;
+        }
+        
+        .dashboard {
+            max-width: 42rem;
+            margin: 0 auto;
+            background: linear-gradient(135deg, #2563eb 0%, #4338ca 100%);
+            color: white;
+            border-radius: 0.5rem;
+            padding: 2rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .dashboard h2 {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+        
+        .dashboard-subtitle {
+            color: #bfdbfe;
+            margin-bottom: 1.5rem;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+        
+        .dashboard-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: white;
+        }
+        
+        .dashboard-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .dashboard-btn.featured {
+            background: #22c55e;
+            border: 2px solid #86efac;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .dashboard-btn.featured:hover {
+            background: #16a34a;
+            transform: scale(1.05);
+        }
+        
+        .btn-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .btn-subtitle {
+            font-size: 0.875rem;
+            opacity: 0.9;
+        }
+        
+        .warning-box {
+            margin-top: 1.5rem;
+            background: rgba(251, 191, 36, 0.2);
+            border: 1px solid rgba(251, 191, 36, 0.5);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            font-size: 0.875rem;
+            color: #fef3c7;
+        }
+        
+        .terminal {
+            max-width: 48rem;
+            margin: 0 auto;
+            background: #1f2937;
+            color: #34d399;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .terminal-header {
+            color: white;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+        
+        .terminal-line {
+            margin-bottom: 0.5rem;
+        }
+        
+        .terminal-param {
+            padding-left: 2rem;
+        }
+        
+        .text-gray {
+            color: #9ca3af;
+        }
+        
+        .text-blue {
+            color: #60a5fa;
+        }
+        
+        .text-yellow {
+            color: #fcd34d;
+        }
+        
+        .terminal-info {
+            margin-top: 1.5rem;
+            background: rgba(37, 99, 235, 0.3);
+            border: 1px solid #1e40af;
+            border-radius: 0.25rem;
+            padding: 1rem;
+            color: #bfdbfe;
+            font-size: 0.75rem;
+        }
+        
+        .consent-screen {
+            max-width: 28rem;
+            margin: 0 auto;
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 0.5rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .consent-header {
+            background: linear-gradient(135deg, #ea580c 0%, #dc2626 100%);
+            color: white;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .consent-body {
+            padding: 1.5rem;
+        }
+        
+        .consent-title {
+            font-weight: bold;
+            font-size: 1.125rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .user-email {
+            font-size: 0.875rem;
+            color: #4b5563;
+            margin-bottom: 1.5rem;
+        }
+        
+        .permissions-box {
+            background: #f9fafb;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .permissions-title {
+            font-weight: 600;
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .permission-list {
+            list-style: none;
+        }
+        
+        .permission-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+        }
+        
+        .checkmark {
+            color: #22c55e;
+            margin-top: 0.125rem;
+        }
+        
+        .btn-full {
+            width: 100%;
+            justify-content: center;
+        }
+        
+        .btn-allow {
+            background: #2563eb;
+            color: white;
+            margin-bottom: 0.75rem;
+        }
+        
+        .btn-allow:hover {
+            background: #1d4ed8;
+        }
+        
+        .btn-cancel {
+            background: #f3f4f6;
+            color: #374151;
+        }
+        
+        .btn-cancel:hover {
+            background: #e5e7eb;
+        }
+        
+        .consent-footer {
+            text-align: center;
+            font-size: 0.75rem;
+            color: #6b7280;
+            margin-top: 1rem;
+        }
+        
+        .success-screen {
+            max-width: 56rem;
+            margin: 0 auto;
+            background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+            border: 2px solid #86efac;
+            border-radius: 0.5rem;
+            padding: 2rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .success-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .success-icon {
+            color: #22c55e;
+        }
+        
+        .success-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #166534;
+        }
+        
+        .success-subtitle {
+            color: #15803d;
+        }
+        
+        .api-box {
+            background: white;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .api-title {
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+        
+        .api-terminal {
+            background: #1f2937;
+            color: #34d399;
+            border-radius: 0.25rem;
+            padding: 1rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+        }
+        
+        .policy-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+        
+        .policy-card {
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            padding: 1rem;
+        }
+        
+        .policy-label {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-bottom: 0.25rem;
+        }
+        
+        .policy-value {
+            font-weight: bold;
+        }
+        
+        .policy-value.green {
+            color: #22c55e;
+        }
+        
+        .success-info {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            font-size: 0.875rem;
+            color: #1e3a8a;
+        }
+        
+        .info-panel {
+            margin-top: 1.5rem;
+            background: white;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .info-title {
+            font-weight: bold;
+            font-size: 1.125rem;
+            margin-bottom: 1rem;
+        }
+        
+        .role-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+        
+        .role-card {
+            border-left: 4px solid;
+            padding-left: 1rem;
+        }
+        
+        .role-card.client {
+            border-color: #2563eb;
+        }
+        
+        .role-card.server {
+            border-color: #ea580c;
+        }
+        
+        .role-card.owner {
+            border-color: #22c55e;
+        }
+        
+        .role-title {
+            font-weight: bold;
+            margin-bottom: 0.25rem;
+        }
+        
+        .role-title.client {
+            color: #2563eb;
+        }
+        
+        .role-title.server {
+            color: #ea580c;
+        }
+        
+        .role-title.owner {
+            color: #22c55e;
+        }
+        
+        .role-desc {
+            font-size: 0.875rem;
+            color: #4b5563;
+        }
+        
+        svg {
+            width: 1.25rem;
+            height: 1.25rem;
+        }
+        
+        .icon-lg {
+            width: 3rem;
+            height: 3rem;
+        }
+        
+        h2 {
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div id="app" class="container"></div>
+
+    <script>
+        let currentStep = 0;
+        let authCode = '';
+        let accessToken = '';
+
+        const steps = [
+            { id: 0, title: 'Advisor Login', description: 'Advisor logs into eMoney/Morningstar' },
+            { id: 1, title: 'Request Access', description: 'Click "View Prudential Policies"' },
+            { id: 2, title: 'Authorization Request', description: 'Redirect to Prudential OAuth' },
+            { id: 3, title: 'Prudential Login', description: 'Advisor logs into Prudential' },
+            { id: 4, title: 'Consent Screen', description: 'Prudential asks for permission' },
+            { id: 5, title: '302 Redirect', description: 'Prudential returns auth code via redirect' },
+            { id: 6, title: 'Token Exchange', description: 'eMoney exchanges code for tokens' },
+            { id: 7, title: 'API Call', description: 'eMoney calls Prudential API with token' },
+            { id: 8, title: 'View Policy Data', description: 'Display Prudential policy information' }
+        ];
+
+        function nextStep() {
+            if (currentStep === 5) {
+                authCode = 'PRUD_AUTH_' + Math.random().toString(36).substr(2, 9).toUpperCase();
+            }
+            if (currentStep === 6) {
+                accessToken = 'eyJhbGc...' + Math.random().toString(36).substr(2, 8);
+            }
+            if (currentStep < steps.length - 1) {
+                currentStep++;
+                render();
+            }
+        }
+
+        function reset() {
+            currentStep = 0;
+            authCode = '';
+            accessToken = '';
+            render();
+        }
+
+        function getStepContent(step) {
+            switch(step) {
+                case 0:
+                    return `
+                        <div class="login-box">
+                            <div class="logo-container">
+                                <div class="logo">eM</div>
+                            </div>
+                            <h2>eMoney Advisor Login</h2>
+                            <div class="form-group">
+                                <label class="form-label">Username</label>
+                                <input type="text" class="form-input" value="advisor@financialgroup.com" readonly />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Password</label>
+                                <input type="password" class="form-input" value="••••••••" readonly />
+                            </div>
+                            <div class="info-box">
+                                <strong>Note:</strong> This login is for eMoney only. Prudential OAuth comes next.
+                            </div>
+                        </div>
+                    `;
+                case 1:
+                    return `
+                        <div class="dashboard">
+                            <h2>eMoney Dashboard</h2>
+                            <p class="dashboard-subtitle">Welcome back, Financial Advisor</p>
+                            <div class="grid">
+                                <button class="dashboard-btn">
+                                    <div class="btn-title">Client Portfolio</div>
+                                    <div class="btn-subtitle">View holdings</div>
+                                </button>
+                                <button class="dashboard-btn">
+                                    <div class="btn-title">Financial Plans</div>
+                                    <div class="btn-subtitle">Create & manage</div>
+                                </button>
+                                <button class="dashboard-btn featured">
+                                    <div class="btn-title">
+                                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                                        </svg>
+                                        View Prudential Policies
+                                    </div>
+                                    <div class="btn-subtitle">Access client insurance data</div>
+                                </button>
+                                <button class="dashboard-btn">
+                                    <div class="btn-title">Reports</div>
+                                    <div class="btn-subtitle">Generate insights</div>
+                                </button>
+                            </div>
+                            <div class="warning-box">
+                                👆 Click "View Prudential Policies" to initiate OAuth flow
+                            </div>
+                        </div>
+                    `;
+                case 2:
+                    return `
+                        <div class="terminal">
+                            <div class="terminal-header">🔄 OAuth Authorization Request (PKCE)</div>
+                            <div class="terminal-line">
+                                <span class="text-gray">GET</span> https://sso.prudential.com/oauth2/authorize
+                            </div>
+                            <div class="terminal-line text-gray">Parameters:</div>
+                            <div class="terminal-line terminal-param">
+                                <span class="text-blue">client_id</span>=<span class="text-yellow">emoney_client_abc123</span>
+                            </div>
+                            <div class="terminal-line terminal-param">
+                                <span class="text-blue">redirect_uri</span>=<span class="text-yellow">https://emoney.com/oauth/callback</span>
+                            </div>
+                            <div class="terminal-line terminal-param">
+                                <span class="text-blue">response_type</span>=<span class="text-yellow">code</span>
+                            </div>
+                            <div class="terminal-line terminal-param">
+                                <span class="text-blue">scope</span>=<span class="text-yellow">policies:read client:read</span>
+                            </div>
+                            <div class="terminal-line terminal-param">
+                                <span class="text-blue">state</span>=<span class="text-yellow">csrf_xyz789</span>
+                            </div>
+                            <div class="terminal-line terminal-param">
+                                <span class="text-blue">code_challenge</span>=<span class="text-yellow">E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM</span>
+                            </div>
+                            <div class="terminal-line terminal-param">
+                                <span class="text-blue">code_challenge_method</span>=<span class="text-yellow">S256</span>
+                            </div>
+                            <div class="terminal-info">
+                                <strong>What's happening:</strong> eMoney redirects the advisor's browser to Prudential's SSO server with PKCE challenge for enhanced security.
+                            </div>
+                            <div class="terminal-info" style="background: rgba(168, 85, 247, 0.2); border-color: #7e22ce; color: #e9d5ff; margin-top: 1rem;">
+                                <strong>🔐 PKCE Security:</strong> code_challenge = SHA256(code_verifier). This prevents authorization code interception attacks.
+                            </div>
+                        </div>
+                    `;
+                case 3:
+                    return `
+                        <div class="login-box">
+                            <div class="logo-container">
+                                <div class="logo" style="background: linear-gradient(135deg, #ea580c 0%, #dc2626 100%);">
+                                    <svg style="width: 2.5rem; height: 2.5rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                                    </svg>
+                                </div>
+                            </div>
+                            <h2>Prudential Login</h2>
+                            <div class="form-group">
+                                <label class="form-label">Username</label>
+                                <input type="text" class="form-input" value="advisor@financialgroup.com" readonly />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Password</label>
+                                <input type="password" class="form-input" value="••••••••" readonly />
+                            </div>
+                            <div class="info-box" style="background: #fff7ed; border-color: #fed7aa; color: #9a3412;">
+                                <strong>Note:</strong> Advisor must authenticate with Prudential before granting access to eMoney.
+                            </div>
+                        </div>
+                    `;
+                case 4:
+                    return `
+                        <div class="consent-screen">
+                            <div class="consent-header">
+                                <svg class="icon-lg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                </svg>
+                                <div>
+                                    <h2 style="margin: 0; text-align: left;">Prudential</h2>
+                                    <p style="font-size: 0.875rem; opacity: 0.9; margin: 0;">Authorization Required</p>
+                                </div>
+                            </div>
+                            <div class="consent-body">
+                                <div class="consent-title">eMoney wants to access your Prudential data</div>
+                                <div class="user-email">advisor@financialgroup.com</div>
+                                <div class="permissions-box">
+                                    <div class="permissions-title">This will allow eMoney to:</div>
+                                    <ul class="permission-list">
+                                        <li class="permission-item">
+                                            <span class="checkmark">✓</span>
+                                            <span>Read your life insurance policies</span>
+                                        </li>
+                                        <li class="permission-item">
+                                            <span class="checkmark">✓</span>
+                                            <span>View client account information</span>
+                                        </li>
+                                        <li class="permission-item">
+                                            <span class="checkmark">✓</span>
+                                            <span>Access policy details and beneficiaries</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <button class="btn btn-allow btn-full">Allow Access</button>
+                                <button class="btn btn-cancel btn-full">Cancel</button>
+                                <div class="consent-footer">
+                                    By clicking Allow, you authorize eMoney to access your data
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                case 5:
+                    return `
+                        <div class="terminal">
+                            <div class="terminal-header">
+                                <svg style="display: inline-block; vertical-align: middle; margin-right: 0.5rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                                </svg>
+                                302 Redirect: Prudential Returns Authorization Code
+                            </div>
+                            <div class="terminal-line text-gray">After user clicks "Allow", Prudential redirects back to eMoney:</div>
+                            <div class="terminal-line" style="word-break: break-all; margin-top: 1rem;">
+                                https://emoney.com/oauth/callback<span class="text-blue">?code=</span><span class="text-yellow" style="background: rgba(251, 191, 36, 0.2); padding: 0 0.25rem;">${authCode}</span><span class="text-blue">&state=</span><span class="text-yellow">csrf_xyz789</span>
+                            </div>
+                            <div class="terminal-info" style="background: rgba(34, 197, 94, 0.2); border-color: #15803d; color: #86efac;">
+                                <strong>Authorization Code Received!</strong> This temporary code proves the advisor approved access. eMoney will exchange it for tokens on the backend.
+                            </div>
+                            <div class="terminal-info" style="background: rgba(234, 88, 12, 0.2); border-color: #c2410c; color: #fed7aa; margin-top: 1rem;">
+                                <strong>⚠️ Security Note:</strong> This code is single-use and expires in ~10 minutes. It cannot be used to access APIs directly.
+                            </div>
+                        </div>
+                    `;
+                case 6:
+                    return `
+                        <div class="terminal">
+                            <div class="terminal-header">
+                                <svg style="display: inline-block; vertical-align: middle; margin-right: 0.5rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                                </svg>
+                                Backend Token Exchange (PKCE Flow)
+                            </div>
+                            <div style="background: rgba(37, 99, 235, 0.2); border: 1px solid #1e40af; border-radius: 0.25rem; padding: 0.75rem; margin-bottom: 0.75rem;">
+                                <div style="color: white; margin-bottom: 0.5rem;">REQUEST (Server-to-Server)</div>
+                                <div class="terminal-line"><span class="text-gray">POST</span> https://sso.prudential.com/oauth2/token</div>
+                                <div class="terminal-line terminal-param"><span class="text-blue">code:</span> <span class="text-yellow">${authCode}</span></div>
+                                <div class="terminal-line terminal-param"><span class="text-blue">grant_type:</span> <span class="text-yellow">authorization_code</span></div>
+                                <div class="terminal-line terminal-param"><span class="text-blue">redirect_uri:</span> <span class="text-yellow">https://emoney.com/oauth/callback</span></div>
+                                <div class="terminal-line terminal-param"><span class="text-blue">code_verifier:</span> <span class="text-yellow">dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk</span></div>
+                            </div>
+                            <div style="background: rgba(34, 197, 94, 0.2); border: 1px solid #15803d; border-radius: 0.25rem; padding: 0.75rem;">
+                                <div style="color: white; margin-bottom: 0.5rem;">RESPONSE</div>
+                                <div class="terminal-line terminal-param"><span class="text-blue">access_token:</span> <span style="color: #86efac; background: rgba(34, 197, 94, 0.2); padding: 0 0.25rem;">${accessToken}</span></div>
+                                <div class="terminal-line terminal-param"><span class="text-blue">token_type:</span> <span class="text-yellow">Bearer</span></div>
+                                <div class="terminal-line terminal-param"><span class="text-blue">expires_in:</span> <span class="text-yellow">3600</span> <span class="text-gray">(1 hour)</span></div>
+                                <div class="terminal-line terminal-param"><span class="text-blue">refresh_token:</span> <span style="color: #c084fc;">refresh_4f8a9b...</span></div>
+                                <div class="terminal-line terminal-param"><span class="text-blue">scope:</span> <span class="text-yellow">policies:read client:read</span></div>
+                            </div>
+                            <div class="terminal-info" style="background: rgba(168, 85, 247, 0.2); border-color: #7e22ce; color: #e9d5ff;">
+                                <strong>🔐 PKCE Security:</strong> Instead of client_secret, the server sends the code_verifier. Prudential's SSO validates that SHA256(code_verifier) matches the code_challenge from step 2. This proves the same client is making both requests without needing a client secret.
+                            </div>
+                        </div>
+                    `;
+                case 7:
+                    return `
+                        <div class="terminal">
+                            <div class="terminal-header">
+                                <svg style="display: inline-block; vertical-align: middle; margin-right: 0.5rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                                </svg>
+                                eMoney Makes API Call to Prudential
+                            </div>
+                            <div class="terminal-line" style="margin-bottom: 1rem;">
+                                <span class="text-gray">GET</span> https://api.prudential.com/v1/policies
+                            </div>
+                            <div class="terminal-line" style="margin-bottom: 1rem;">
+                                <span class="text-blue">Authorization:</span> <span class="text-yellow">Bearer ${accessToken}</span>
+                            </div>
+                            <div class="terminal-info" style="background: rgba(37, 99, 235, 0.2); border-color: #1e40af; color: #bfdbfe;">
+                                <strong>What's happening:</strong> eMoney uses the access token to authenticate the API request to Prudential's resource server.
+                            </div>
+                        </div>
+                    `;
+                case 8:
+                    return `
+                        <div style="max-width: 64rem; margin: 0 auto;">
+                            <div style="background: linear-gradient(135deg, #2563eb 0%, #4338ca 100%); color: white; border-radius: 0.5rem 0.5rem 0 0; padding: 1.5rem; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);">
+                                <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                                    <div style="width: 3rem; height: 3rem; background: white; border-radius: 0.5rem; display: flex; align-items: center; justify-content: center;">
+                                        <span style="color: #2563eb; font-weight: bold; font-size: 1.25rem;">eM</span>
+                                    </div>
+                                    <div>
+                                        <h2 style="margin: 0; text-align: left; font-size: 1.5rem;">eMoney Advisor Portal</h2>
+                                        <p style="margin: 0; font-size: 0.875rem; opacity: 0.9;">Client: John Smith</p>
+                                    </div>
+                                </div>
+                                <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+                                    <button style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.3); padding: 0.5rem 1rem; border-radius: 0.375rem; color: white; font-size: 0.875rem; cursor: pointer;">Portfolio</button>
+                                    <button style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.3); padding: 0.5rem 1rem; border-radius: 0.375rem; color: white; font-size: 0.875rem; cursor: pointer;">Financial Plan</button>
+                                    <button style="background: white; color: #2563eb; border: 2px solid white; padding: 0.5rem 1rem; border-radius: 0.375rem; font-size: 0.875rem; font-weight: 600; cursor: pointer;">Insurance Policies</button>
+                                    <button style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.3); padding: 0.5rem 1rem; border-radius: 0.375rem; color: white; font-size: 0.875rem; cursor: pointer;">Documents</button>
+                                </div>
+                            </div>
+                            
+                            <div style="background: white; border-radius: 0 0 0.5rem 0.5rem; padding: 2rem; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);">
+                                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
+                                    <h3 style="font-size: 1.25rem; font-weight: bold; margin: 0;">Prudential Life Insurance Policies</h3>
+                                    <div style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; background: #ecfdf5; border: 1px solid #86efac; border-radius: 0.375rem;">
+                                        <svg style="width: 1rem; height: 1rem; color: #22c55e;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        <span style="color: #166534; font-size: 0.875rem; font-weight: 600;">Connected via OAuth</span>
+                                    </div>
+                                </div>
+
+                                <div style="border: 2px solid #e5e7eb; border-radius: 0.5rem; overflow: hidden; margin-bottom: 1.5rem;">
+                                    <div style="background: linear-gradient(135deg, #f97316 0%, #dc2626 100%); color: white; padding: 1rem; display: flex; align-items: center; justify-content: space-between;">
+                                        <div style="display: flex; align-items: center; gap: 1rem;">
+                                            <svg style="width: 2rem; height: 2rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                                            </svg>
+                                            <div>
+                                                <div style="font-size: 0.875rem; opacity: 0.9;">Policy Number</div>
+                                                <div style="font-size: 1.25rem; font-weight: bold;">PRU-2024-891234</div>
+                                            </div>
+                                        </div>
+                                        <div style="text-align: right;">
+                                            <div style="font-size: 0.875rem; opacity: 0.9;">Coverage</div>
+                                            <div style="font-size: 1.5rem; font-weight: bold;">$500,000</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div style="padding: 1.5rem; background: white;">
+                                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 1.5rem;">
+                                            <div>
+                                                <div style="font-size: 0.75rem; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem;">Policy Type</div>
+                                                <div style="font-weight: 600; color: #1f2937;">Whole Life Insurance</div>
+                                            </div>
+                                            <div>
+                                                <div style="font-size: 0.75rem; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem;">Status</div>
+                                                <div style="display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.25rem 0.75rem; background: #d1fae5; color: #065f46; border-radius: 9999px; font-size: 0.875rem; font-weight: 600;">
+                                                    <span style="width: 0.5rem; height: 0.5rem; background: #10b981; border-radius: 50%;"></span>
+                                                    Active
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <div style="font-size: 0.75rem; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem;">Issue Date</div>
+                                                <div style="font-weight: 600; color: #1f2937;">January 15, 2024</div>
+                                            </div>
+                                        </div>
+
+                                        <div style="border-top: 1px solid #e5e7eb; padding-top: 1.5rem;">
+                                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem;">
+                                                <div>
+                                                    <div style="font-size: 0.75rem; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem;">Policy Holder</div>
+                                                    <div style="font-weight: 600; color: #1f2937;">John Smith</div>
+                                                </div>
+                                                <div>
+                                                    <div style="font-size: 0.75rem; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem;">Primary Beneficiary</div>
+                                                    <div style="font-weight: 600; color: #1f2937;">Jane Smith (Spouse)</div>
+                                                </div>
+                                                <div>
+                                                    <div style="font-size: 0.75rem; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem;">Annual Premium</div>
+                                                    <div style="font-weight: 600; color: #1f2937; font-size: 1.125rem;">$4,800.00</div>
+                                                </div>
+                                                <div>
+                                                    <div style="font-size: 0.75rem; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem;">Next Payment Due</div>
+                                                    <div style="font-weight: 600; color: #1f2937;">January 15, 2025</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 0.5rem; padding: 1rem;">
+                                    <div style="display: flex; align-items: start; gap: 0.75rem;">
+                                        <svg style="width: 1.25rem; height: 1.25rem; color: #2563eb; flex-shrink: 0; margin-top: 0.125rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        <div style="font-size: 0.875rem; color: #1e40af;">
+                                            <strong>OAuth 2.0 PKCE Integration:</strong> This policy data was securely retrieved from Prudential using OAuth 2.0 with PKCE. The advisor never had access to the client's Prudential password, and access can be revoked at any time.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                default:
+                    return '';
+            }
+        }
+
+        function render() {
+            const app = document.getElementById('app');
+            
+            let progressHTML = '';
+            steps.forEach((s, idx) => {
+                const stepClass = idx <= currentStep ? '' : 'inactive';
+                const circleClass = idx < currentStep ? 'completed' : idx === currentStep ? 'current' : 'pending';
+                
+                progressHTML += `
+                    <div class="progress-step">
+                        <div class="step-wrapper ${stepClass}">
+                            <div class="step-circle ${circleClass}">
+                                ${idx < currentStep ? '✓' : idx + 1}
+                            </div>
+                            <div class="step-title">${s.title}</div>
+                        </div>
+                        ${idx < steps.length - 1 ? `<div class="progress-line ${idx < currentStep ? 'completed' : 'pending'}"></div>` : ''}
+                    </div>
+                `;
+            });
+            
+            app.innerHTML = `
+                <div class="card">
+                    <div class="header">
+                        <h1>OAuth 2.0 Authorization Code Flow</h1>
+                        <p>Financial Advisor accessing Prudential policy data via eMoney/Morningstar</p>
+                    </div>
+                    
+                    <div class="progress-bar">
+                        <div class="progress-container">
+                            ${progressHTML}
+                        </div>
+                    </div>
+                    
+                    <div class="content">
+                        ${getStepContent(currentStep)}
+                    </div>
+                    
+                    <div class="footer">
+                        <div class="footer-text">
+                            <strong>Current Step:</strong> ${steps[currentStep].description}
+                        </div>
+                        <div class="button-group">
+                            ${currentStep > 0 ? '<button class="btn btn-secondary" onclick="reset()">Reset</button>' : ''}
+                            ${currentStep < steps.length - 1 ? `
+                                <button class="btn btn-primary" onclick="nextStep()">
+                                    ${currentStep === 3 ? 'Login to Prudential' : currentStep === 4 ? 'Allow Access' : 'Next Step'}
+                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                                    </svg>
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="info-panel">
+                    <div class="info-title">Key Roles in This Flow:</div>
+                    <div class="role-grid">
+                        <div class="role-card client">
+                            <div class="role-title client">Client (eMoney)</div>
+                            <div class="role-desc">The application requesting access to resources</div>
+                        </div>
+                        <div class="role-card server">
+                            <div class="role-title server">Resource Server (Prudential)</div>
+                            <div class="role-desc">Owns the protected data (policies, client info)</div>
+                        </div>
+                        <div class="role-card owner">
+                            <div class="role-title owner">Resource Owner (Advisor)</div>
+                            <div class="role-desc">The user who authorizes access</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Initial render
+        render();
+    </script>
+</body>
+</html>
