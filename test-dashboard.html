@@ -1,0 +1,1760 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test Automation Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Source+Sans+3:wght@300;400;500;600;700&family=Source+Code+Pro:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy:    #003865;
+  --navy2:   #00254d;
+  --navy3:   #001f40;
+  --red:     #e31837;
+  --red2:    #b8122c;
+  --gold:    #c8972b;
+  --gold2:   #a8791e;
+  --white:   #ffffff;
+  --off:     #f5f6f8;
+  --off2:    #eef0f4;
+  --border:  #d0d5de;
+  --border2: #b8bfcc;
+  --text:    #1a1a2e;
+  --sub:     #4a5568;
+  --light:   #718096;
+  --sans:    'Source Sans 3', sans-serif;
+  --serif:   'Playfair Display', serif;
+  --mono:    'Source Code Pro', monospace;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:var(--sans); color:var(--text); background:var(--off); min-height:100vh; }
+
+/* ── PAGES ── */
+.page { display:none; min-height:100vh; }
+.page.active { display:flex; flex-direction:column; }
+
+/* ── TOP NAV ── */
+.topnav {
+  background:var(--white);
+  border-bottom:1px solid var(--border);
+  padding:0 48px;
+  height:56px;
+  display:flex; align-items:center; justify-content:space-between;
+  position:sticky; top:0; z-index:100;
+  flex-shrink:0;
+}
+.topnav-left { display:flex; align-items:center; gap:0; }
+.topnav-logo {
+  display:flex; align-items:center; gap:10px;
+  padding-right:28px;
+  border-right:1px solid var(--border);
+  margin-right:28px;
+  text-decoration:none;
+}
+.logo-rock {
+  width:26px; height:32px;
+  background:var(--navy);
+  clip-path:polygon(50% 0%, 100% 28%, 100% 100%, 0% 100%, 0% 28%);
+  display:flex; align-items:center; justify-content:center;
+  flex-shrink:0;
+}
+.logo-rock-inner {
+  width:11px; height:15px;
+  background:var(--white);
+  clip-path:polygon(50% 0%, 100% 28%, 100% 100%, 0% 100%, 0% 28%);
+}
+.logo-text {
+  font-family:var(--serif); font-size:16px;
+  color:var(--navy); font-weight:700; letter-spacing:0.3px;
+}
+.logo-company {
+  font-size:10px; color:var(--light); font-weight:500;
+  letter-spacing:1px; text-transform:uppercase; margin-top:1px;
+}
+.topnav-nav { display:flex; align-items:center; gap:4px; }
+.topnav-link {
+  padding:6px 14px; border-radius:4px;
+  font-size:13px; font-weight:500; color:var(--sub);
+  cursor:pointer; border:none; background:none;
+  font-family:var(--sans); transition:all 0.15s;
+  display:flex; align-items:center; gap:5px;
+}
+.topnav-link:hover { background:var(--off); color:var(--navy); }
+.topnav-link.active { background:var(--off2); color:var(--navy); font-weight:600; }
+.topnav-right { display:flex; align-items:center; gap:16px; }
+.topnav-user {
+  display:flex; align-items:center; gap:8px;
+  font-size:13px; font-weight:500; color:var(--sub);
+  cursor:pointer; padding:5px 10px; border-radius:4px;
+  transition:background 0.15s;
+}
+.topnav-user:hover { background:var(--off); }
+.user-avatar {
+  width:30px; height:30px; border-radius:50%;
+  background:var(--navy); color:var(--white);
+  display:flex; align-items:center; justify-content:center;
+  font-size:12px; font-weight:700; flex-shrink:0;
+}
+
+/* ── BREADCRUMB BAR ── */
+.breadcrumb-bar {
+  background:var(--white);
+  border-bottom:1px solid var(--border);
+  padding:10px 48px;
+  display:flex; align-items:center; gap:6px;
+  font-size:12px;
+  flex-shrink:0;
+}
+.bc-link {
+  color:var(--navy); cursor:pointer; font-weight:500;
+  transition:color 0.15s;
+}
+.bc-link:hover { color:var(--red); }
+.bc-sep { color:var(--border2); font-size:14px; }
+.bc-current { color:var(--sub); font-weight:400; }
+
+/* ── PAGE HEADER ── */
+.page-header {
+  padding:24px 48px 20px;
+  border-bottom:1px solid var(--border);
+  background:var(--white);
+  display:flex; align-items:flex-start; justify-content:space-between;
+  gap:16px; flex-shrink:0;
+}
+.page-header-left {}
+.ph-eyebrow {
+  font-size:10px; letter-spacing:3px; text-transform:uppercase;
+  color:var(--red); font-weight:700; margin-bottom:6px;
+}
+.ph-title {
+  font-family:var(--serif); font-size:24px;
+  color:var(--navy); font-weight:700; margin-bottom:4px;
+}
+.ph-sub {
+  font-size:13px; color:var(--light); max-width:580px; line-height:1.5;
+}
+.page-header-right {
+  display:flex; align-items:center; gap:10px; flex-shrink:0; padding-top:6px;
+}
+
+/* ── TAB BAR (inside page, below page-header) ── */
+.tab-bar {
+  display:flex; gap:0;
+  border-bottom:1px solid var(--border);
+  background:var(--white);
+  padding:0 48px;
+  flex-shrink:0;
+}
+.tab-btn {
+  background:none; border:none; cursor:pointer;
+  font-family:var(--sans); font-size:12px; font-weight:600;
+  letter-spacing:0.5px; color:var(--light);
+  padding:12px 20px; border-bottom:3px solid transparent;
+  transition:color 0.2s, border-color 0.2s;
+  text-transform:uppercase; white-space:nowrap;
+  margin-bottom:-1px;
+}
+.tab-btn:hover { color:var(--navy); }
+.tab-btn.active { color:var(--navy); border-bottom-color:var(--red); }
+
+/* ── CONTENT ── */
+.content { flex:1; padding:32px 48px; }
+
+/* ── BUTTONS ── */
+.btn {
+  display:inline-flex; align-items:center; gap:8px;
+  font-family:var(--sans); font-size:13px; font-weight:600;
+  padding:9px 20px; border-radius:3px; cursor:pointer;
+  border:none; transition:all 0.2s; letter-spacing:0.3px;
+  white-space:nowrap;
+}
+.btn-primary { background:var(--navy); color:var(--white); }
+.btn-primary:hover { background:var(--navy2); }
+.btn-primary:disabled { background:#9daec2; cursor:not-allowed; }
+.btn-red { background:var(--red); color:var(--white); }
+.btn-red:hover { background:var(--red2); }
+.btn-outline {
+  background:transparent; color:var(--navy);
+  border:1.5px solid var(--navy); padding:7px 16px;
+}
+.btn-outline:hover { background:var(--navy); color:var(--white); }
+.btn-sm { font-size:11px; padding:5px 14px; }
+.btn-icon { width:28px; height:28px; padding:0; justify-content:center; border-radius:4px; }
+
+/* ── LOADING ── */
+.loading {
+  display:flex; align-items:center; justify-content:center;
+  padding:60px; flex-direction:column; gap:16px;
+}
+.spinner {
+  width:32px; height:32px; border:3px solid var(--border);
+  border-top-color:var(--navy); border-radius:50%;
+  animation:spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform:rotate(360deg); } }
+.loading-text { font-size:13px; color:var(--light); }
+
+/* ── EMPTY STATE ── */
+.empty-state {
+  text-align:center; padding:60px 20px; color:var(--light);
+}
+.empty-icon { font-size:40px; margin-bottom:12px; opacity:0.4; }
+.empty-title { font-size:15px; font-weight:600; color:var(--sub); margin-bottom:6px; }
+.empty-sub { font-size:13px; }
+
+/* ── CARDS ── */
+.card {
+  background:var(--white); border:1px solid var(--border);
+  border-radius:6px; overflow:hidden;
+}
+.card-head {
+  padding:14px 20px; border-bottom:1px solid var(--border);
+  display:flex; align-items:center; justify-content:space-between;
+  background:var(--off);
+}
+.card-title {
+  font-size:13px; font-weight:700; color:var(--navy);
+  display:flex; align-items:center; gap:8px;
+}
+.card-count {
+  font-family:var(--mono); font-size:10px;
+  background:var(--navy); color:var(--white);
+  padding:2px 8px; border-radius:10px;
+}
+
+/* ── TABLE ── */
+table { width:100%; border-collapse:collapse; }
+th {
+  padding:10px 16px; font-size:10px; font-weight:700;
+  letter-spacing:1.5px; text-transform:uppercase;
+  color:var(--navy); background:var(--off2);
+  border-bottom:2px solid var(--border); text-align:left;
+  white-space:nowrap;
+}
+th.th-center { text-align:center; }
+td {
+  padding:11px 16px; font-size:13px; color:var(--sub);
+  border-bottom:1px solid rgba(0,0,0,0.05);
+  vertical-align:middle;
+}
+tr:last-child td { border-bottom:none; }
+tr:hover td { background:#fafbfc; }
+.tr-clickable { cursor:pointer; }
+.tr-clickable:hover td { background:#f0f4fa; }
+.tr-selected td { background:#e8eef6 !important; }
+
+.td-name { color:var(--navy); font-weight:600; font-size:13px; }
+.td-mono { font-family:var(--mono); font-size:11px; color:var(--sub); }
+.td-center { text-align:center; }
+.td-light { color:var(--light); font-size:12px; }
+
+/* ── STATUS CHIPS ── */
+.chip {
+  display:inline-flex; align-items:center; gap:4px;
+  font-family:var(--mono); font-size:9px; font-weight:700;
+  padding:2px 8px; border-radius:3px; letter-spacing:0.5px;
+  white-space:nowrap;
+}
+.chip-dot { width:5px; height:5px; border-radius:50%; }
+.chip-green  { background:#d1fae5; color:#065f46; border:1px solid #6ee7b7; }
+.chip-red    { background:#fee2e2; color:#7f1d1d; border:1px solid #fca5a5; }
+.chip-yellow { background:#fef3c7; color:#92400e; border:1px solid #fcd34d; }
+.chip-blue   { background:#dbeafe; color:#1e3a8a; border:1px solid #93c5fd; }
+.chip-gray   { background:var(--off2); color:var(--sub); border:1px solid var(--border); }
+.chip-green .chip-dot  { background:#065f46; }
+.chip-red .chip-dot    { background:#7f1d1d; }
+.chip-yellow .chip-dot { background:#92400e; animation:blink 1.2s ease-in-out infinite; }
+.chip-blue .chip-dot   { background:#1e3a8a; }
+.chip-gray .chip-dot   { background:var(--sub); }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+/* ── PLANS TABLE SEARCH BAR ── */
+.plans-search-bar {
+  display:flex; align-items:center; gap:12px; margin-bottom:16px;
+}
+.search-input-wrap {
+  position:relative; flex:1; max-width:400px;
+}
+.search-icon {
+  position:absolute; left:12px; top:50%; transform:translateY(-50%);
+  color:var(--light); font-size:14px; pointer-events:none;
+}
+.search-input {
+  width:100%; padding:8px 12px 8px 36px;
+  border:1.5px solid var(--border); border-radius:4px;
+  font-family:var(--sans); font-size:13px; color:var(--text);
+  background:var(--white); outline:none; transition:border-color 0.2s;
+}
+.search-input:focus { border-color:var(--navy); }
+.search-input::placeholder { color:var(--light); }
+.plans-count-label {
+  font-size:12px; color:var(--light); white-space:nowrap;
+}
+
+/* ── CHECKBOX ── */
+.cb-wrap { display:flex; align-items:center; gap:8px; cursor:pointer; }
+.cb {
+  width:16px; height:16px; border:2px solid var(--border2);
+  border-radius:3px; background:white; display:flex;
+  align-items:center; justify-content:center; flex-shrink:0;
+  transition:all 0.15s; cursor:pointer;
+}
+.cb.checked { background:var(--navy); border-color:var(--navy); }
+.cb-check { color:white; font-size:10px; font-weight:700; display:none; }
+.cb.checked .cb-check { display:block; }
+.cb-all { border-color:var(--navy); }
+.cb-all.checked { background:var(--red); border-color:var(--red); }
+.cb-all.partial { background:var(--off2); border-color:var(--navy); }
+
+/* ── RUN TOOLBAR ── */
+.run-toolbar {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:12px 16px; background:#e8eef6;
+  border-bottom:1px solid var(--border);
+  transition:all 0.2s;
+}
+.rt-left { display:flex; align-items:center; gap:12px; }
+.rt-count { font-size:13px; color:var(--navy); font-weight:600; }
+.rt-sub { font-size:12px; color:var(--sub); }
+
+/* ── JOB HISTORY ROW ── */
+.job-link {
+  color:var(--navy); font-weight:600; cursor:pointer;
+  font-family:var(--mono); font-size:11px;
+  text-decoration:underline; text-decoration-color:transparent;
+  transition:text-decoration-color 0.2s;
+}
+.job-link:hover { text-decoration-color:var(--navy); }
+
+/* ── PROGRESS BAR ── */
+.prog-bar {
+  height:4px; background:var(--border); border-radius:2px; overflow:hidden;
+  margin-top:4px; width:80px;
+}
+.prog-fill { height:100%; border-radius:2px; transition:width 0.4s; }
+.prog-green { background:#059669; }
+.prog-red   { background:var(--red); }
+.prog-yellow { background:var(--gold); }
+
+/* ── RESULT DETAIL CELLS ── */
+.result-order {
+  font-family:var(--mono); font-size:11px;
+  color:var(--light); font-weight:600;
+}
+.duration-cell {
+  font-family:var(--mono); font-size:11px; color:var(--sub);
+}
+
+/* ── ERROR MESSAGE ── */
+.error-msg {
+  font-family:var(--mono); font-size:10px; color:var(--red);
+  background:#fff0f0; border:1px solid #fca5a5;
+  border-radius:3px; padding:3px 8px;
+  max-width:280px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+
+/* ── TOAST ── */
+#toast {
+  position:fixed; bottom:28px; right:28px; z-index:9999;
+  background:var(--navy3); color:white; padding:14px 20px;
+  border-radius:6px; font-size:13px; font-weight:500;
+  box-shadow:0 8px 32px rgba(0,0,0,0.3);
+  transform:translateY(80px); opacity:0;
+  transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  display:flex; align-items:center; gap:10px;
+  border-left:4px solid var(--gold);
+  max-width:360px;
+}
+#toast.show { transform:translateY(0); opacity:1; }
+#toast.toast-error { border-left-color:var(--red); }
+#toast.toast-success { border-left-color:#059669; }
+
+/* ── STATS ROW ── */
+.stats-row {
+  display:grid; grid-template-columns:repeat(4,1fr); gap:16px;
+  margin-bottom:28px;
+}
+.stat-card {
+  background:var(--white); border:1px solid var(--border);
+  border-radius:6px; padding:18px 20px;
+  border-top:3px solid transparent;
+}
+.stat-card-navy { border-top-color:var(--navy); }
+.stat-card-gold  { border-top-color:var(--gold); }
+.stat-card-green { border-top-color:#059669; }
+.stat-card-red   { border-top-color:var(--red); }
+.stat-val { font-family:var(--serif); font-size:28px; font-weight:700; color:var(--navy); }
+.stat-label { font-size:11px; color:var(--light); font-weight:600; letter-spacing:1px; text-transform:uppercase; margin-top:4px; }
+
+/* ── JOB RESULT SUMMARY ── */
+.result-summary {
+  display:flex; align-items:center; gap:16px; padding:16px 20px;
+  background:var(--off); border-bottom:1px solid var(--border);
+}
+.rs-item { display:flex; align-items:center; gap:8px; font-size:13px; }
+.rs-val { font-weight:700; font-family:var(--mono); }
+.rs-label { color:var(--light); font-size:12px; }
+.rs-sep { width:1px; height:20px; background:var(--border); }
+
+/* ── TABS for plan detail ── */
+.inner-tabs { display:flex; gap:0; border-bottom:2px solid var(--border); margin-bottom:24px; }
+.inner-tab {
+  padding:10px 20px; font-size:12px; font-weight:600;
+  letter-spacing:0.5px; text-transform:uppercase;
+  color:var(--light); cursor:pointer; border:none; background:none;
+  font-family:var(--sans); border-bottom:3px solid transparent;
+  margin-bottom:-2px; transition:all 0.2s;
+}
+.inner-tab:hover { color:var(--navy); }
+.inner-tab.active { color:var(--navy); border-bottom-color:var(--red); }
+.inner-tab-panel { display:none; }
+.inner-tab-panel.active { display:block; }
+
+/* ── RESPONSIVE ── */
+@media (max-width:900px) {
+  .topnav, .breadcrumb-bar, .page-header, .tab-bar { padding-left:20px; padding-right:20px; }
+  .content { padding:20px; }
+  .stats-row { grid-template-columns:1fr 1fr; }
+}
+
+/* ── EXPANDABLE RESULT ROWS ── */
+.expand-btn {
+  width:22px; height:22px; border-radius:3px;
+  border:1.5px solid var(--border2); background:var(--white);
+  cursor:pointer; display:flex; align-items:center; justify-content:center;
+  font-size:11px; font-weight:700; color:var(--sub);
+  transition:all 0.15s; flex-shrink:0;
+}
+.expand-btn:hover { border-color:var(--navy); color:var(--navy); background:var(--off2); }
+.expand-btn.open { background:var(--navy); border-color:var(--navy); color:white; }
+.detail-row td {
+  padding:0 !important; border-bottom:1px solid var(--border) !important;
+  background:var(--off) !important;
+}
+.detail-panel {
+  padding:20px 24px; display:none;
+  border-top:2px solid var(--navy);
+}
+.detail-panel.open { display:block; }
+.detail-grid {
+  display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr));
+  gap:12px 20px; margin-bottom:16px;
+}
+.detail-field { display:flex; flex-direction:column; gap:3px; }
+.detail-label {
+  font-size:9px; font-weight:700; letter-spacing:1.5px;
+  text-transform:uppercase; color:var(--light);
+}
+.detail-value {
+  font-size:12px; color:var(--sub); font-family:var(--mono);
+  word-break:break-all;
+}
+.detail-value.highlight { color:var(--navy); font-weight:600; }
+.detail-section-title {
+  font-size:10px; font-weight:700; letter-spacing:2px;
+  text-transform:uppercase; color:var(--navy);
+  margin:16px 0 10px; padding-bottom:6px;
+  border-bottom:1px solid var(--border);
+  display:flex; align-items:center; gap:8px;
+}
+.json-block-wrap { position:relative; }
+.json-toggle-btn {
+  display:inline-flex; align-items:center; gap:6px;
+  font-size:11px; font-weight:600; color:var(--navy);
+  background:var(--off2); border:1.5px solid var(--border);
+  border-radius:4px; padding:4px 12px; cursor:pointer;
+  font-family:var(--sans); transition:all 0.15s; margin-bottom:6px;
+}
+.json-toggle-btn:hover { background:var(--navy); color:white; border-color:var(--navy); }
+.json-toggle-btn .jt-icon { font-size:10px; transition:transform 0.2s; }
+.json-toggle-btn.open .jt-icon { transform:rotate(90deg); }
+.json-pre {
+  display:none; background:var(--navy3); color:#a8d5a2;
+  border-radius:4px; padding:14px 16px;
+  font-family:var(--mono); font-size:11px; line-height:1.6;
+  overflow-x:auto; white-space:pre; max-height:280px;
+  overflow-y:auto; border:1px solid rgba(255,255,255,0.06);
+}
+.json-pre.open { display:block; }
+.json-key   { color:#79b8ff; }
+.json-str   { color:#9ecbff; }
+.json-num   { color:#f8c555; }
+.json-bool  { color:#f97583; }
+.json-null  { color:#6a737d; }
+
+/* ── POLLING indicator ── */
+.polling-badge {
+  display:inline-flex; align-items:center; gap:6px;
+  font-size:11px; color:#c05621; font-weight:600;
+  background:#fff7ed; border:1px solid #fbd38d;
+  border-radius:20px; padding:3px 10px;
+}
+.polling-dot { width:6px; height:6px; border-radius:50%; background:#c05621; animation:blink 1s infinite; }
+</style>
+</head>
+<body>
+<!-- SHARED TOP NAV (one instance, shown always) -->
+<nav class="topnav">
+  <div class="topnav-left">
+    <div class="topnav-logo">
+      <div class="logo-rock"><div class="logo-rock-inner"></div></div>
+      <div>
+        <div class="logo-text">API</div>
+        <div class="logo-company">Test Automation</div>
+      </div>
+    </div>
+    <div class="topnav-nav">
+      <button class="topnav-link active" onclick="goTo('plans')">Home</button>
+      <button class="topnav-link" onclick="goTo('plans')">Test Plans</button>
+    </div>
+  </div>
+  <div class="topnav-right">
+    <div class="topnav-user">
+      <div class="user-avatar">QA</div>
+      <span>QA Engineer</span>
+      <span style="color:var(--border2);font-size:10px;">▾</span>
+    </div>
+  </div>
+</nav>
+
+<!-- ══════════════════ PAGE 1: TEST PLANS ══════════════════ -->
+<div id="page-plans" class="page active">
+  <div class="breadcrumb-bar">
+    <span class="bc-link" onclick="goTo('plans')">Home</span>
+    <span class="bc-sep">›</span>
+    <span class="bc-current">Test Plans</span>
+  </div>
+  <div class="page-header">
+    <div class="page-header-left">
+      <div class="ph-eyebrow">Test Automation</div>
+      <div class="ph-title">Test Plans</div>
+      <div class="ph-sub">Select a test plan to view its test cases, run jobs, and track execution history.</div>
+    </div>
+    <div class="page-header-right">
+      <button class="btn btn-outline btn-sm" onclick="loadPlans()">↻ Refresh</button>
+    </div>
+  </div>
+  <div class="content">
+    <div id="plans-loading" class="loading">
+      <div class="spinner"></div>
+      <div class="loading-text">Loading test plans…</div>
+    </div>
+    <div id="plans-table-section" style="display:none;">
+      <div class="plans-search-bar">
+        <div class="search-input-wrap">
+          <span class="search-icon">🔍</span>
+          <input class="search-input" id="plans-search" type="text"
+                 placeholder="Search by plan name or description…"
+                 oninput="filterPlans(this.value)">
+        </div>
+        <span class="plans-count-label" id="plans-count-label"></span>
+      </div>
+      <div class="card">
+        <table>
+          <thead>
+            <tr>
+              <th>Plan Name</th>
+              <th>Description</th>
+              <th class="th-center">Test Cases</th>
+              <th class="th-center">Open</th>
+            </tr>
+          </thead>
+          <tbody id="plans-tbody"></tbody>
+        </table>
+        <div id="plans-no-match" class="empty-state" style="display:none;">
+          <div class="empty-icon">🔍</div>
+          <div class="empty-title">No plans match your search</div>
+          <div class="empty-sub">Try a different name or description.</div>
+        </div>
+      </div>
+    </div>
+    <div id="plans-empty" class="empty-state" style="display:none;">
+      <div class="empty-icon">📋</div>
+      <div class="empty-title">No test plans found</div>
+      <div class="empty-sub">Make sure the API server is running at the configured base URL.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ PAGE 2: PLAN DETAIL ══════════════════ -->
+<div id="page-plan" class="page">
+  <div class="breadcrumb-bar">
+    <span class="bc-link" onclick="goTo('plans')">Home</span>
+    <span class="bc-sep">›</span>
+    <span class="bc-link" onclick="goTo('plans')">Test Plans</span>
+    <span class="bc-sep">›</span>
+    <span class="bc-current" id="plan-breadcrumb">—</span>
+  </div>
+  <div class="page-header">
+    <div class="page-header-left">
+      <div class="ph-eyebrow">Test Plan</div>
+      <div class="ph-title" id="plan-hero-title">—</div>
+      <div class="ph-sub" id="plan-hero-sub"></div>
+    </div>
+    <div class="page-header-right" id="plan-tc-badge-wrap">
+      <span id="res-polling-badge-plan" style="display:none;">
+        <span class="polling-badge"><span class="polling-dot"></span>Job running…</span>
+      </span>
+    </div>
+  </div>
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchInnerTab('test-cases', this)">Test Cases</button>
+    <button class="tab-btn" onclick="switchInnerTab('job-history', this)">Job History</button>
+  </div>
+  <div class="content">
+
+    <!-- STATS -->
+    <div class="stats-row" id="plan-stats" style="display:none; margin-bottom:24px;">
+      <div class="stat-card stat-card-navy"><div class="stat-val" id="stat-total">—</div><div class="stat-label">Test Cases</div></div>
+      <div class="stat-card stat-card-gold"><div class="stat-val" id="stat-suites">—</div><div class="stat-label">Test Suites</div></div>
+      <div class="stat-card stat-card-green"><div class="stat-val" id="stat-jobs">—</div><div class="stat-label">Jobs Run</div></div>
+      <div class="stat-card stat-card-red"><div class="stat-val" id="stat-last">—</div><div class="stat-label">Last Status</div></div>
+    </div>
+
+    <!-- TEST CASES TAB -->
+    <div id="inner-test-cases" class="inner-tab-panel active">
+      <div class="card">
+        <div class="run-toolbar" id="run-toolbar">
+          <div class="rt-left">
+            <div class="cb cb-all" id="cb-all" onclick="toggleAll()">
+              <span class="cb-check">✓</span>
+            </div>
+            <div>
+              <div class="rt-count" id="sel-count">Select test cases to run</div>
+              <div class="rt-sub">Click rows or use checkbox to select</div>
+            </div>
+          </div>
+          <button class="btn btn-red" id="run-btn" disabled onclick="triggerRun()">
+            ▶ Run Selected
+          </button>
+        </div>
+        <div id="tc-loading" class="loading">
+          <div class="spinner"></div>
+          <div class="loading-text">Loading test cases…</div>
+        </div>
+        <div id="tc-table-wrap" style="display:none;">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:36px;"></th>
+                <th>Suite</th>
+                <th>Test Case</th>
+                <th>Method</th>
+                <th class="th-center">Suite Order</th>
+                <th class="th-center">Case Order</th>
+              </tr>
+            </thead>
+            <tbody id="tc-tbody"></tbody>
+          </table>
+        </div>
+        <div id="tc-empty" class="empty-state" style="display:none;">
+          <div class="empty-icon">🔬</div>
+          <div class="empty-title">No test cases found</div>
+          <div class="empty-sub">This test plan has no registered test cases.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- JOB HISTORY TAB -->
+    <div id="inner-job-history" class="inner-tab-panel">
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">
+            Job History
+            <span class="card-count" id="jobs-count">0</span>
+          </div>
+          <button class="btn btn-outline btn-sm" onclick="loadJobs()">↻ Refresh</button>
+        </div>
+        <div id="jobs-loading" class="loading" style="display:none;">
+          <div class="spinner"></div>
+          <div class="loading-text">Loading jobs…</div>
+        </div>
+        <div id="jobs-table-wrap" style="display:none;">
+          <table>
+            <thead>
+              <tr>
+                <th>Job ID</th>
+                <th>Description</th>
+                <th>Status</th>
+                <th>Triggered By</th>
+                <th>Triggered At</th>
+                <th class="th-center">Results</th>
+              </tr>
+            </thead>
+            <tbody id="jobs-tbody"></tbody>
+          </table>
+        </div>
+        <div id="jobs-empty" class="empty-state">
+          <div class="empty-icon">🗂️</div>
+          <div class="empty-title">No jobs yet</div>
+          <div class="empty-sub">Run a job from the Test Cases tab to see history here.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════ PAGE 3: JOB RESULTS ══════════════════ -->
+<div id="page-results" class="page">
+  <div class="breadcrumb-bar">
+    <span class="bc-link" onclick="goTo('plans')">Home</span>
+    <span class="bc-sep">›</span>
+    <span class="bc-link" onclick="goTo('plans')">Test Plans</span>
+    <span class="bc-sep">›</span>
+    <span class="bc-link" onclick="goTo('plan')" id="res-plan-crumb">—</span>
+    <span class="bc-sep">›</span>
+    <span class="bc-current">Job Results</span>
+  </div>
+  <div class="page-header">
+    <div class="page-header-left">
+      <div class="ph-eyebrow">Job Execution</div>
+      <div class="ph-title">Test Results</div>
+      <div class="ph-sub" id="res-job-id-display"></div>
+    </div>
+    <div class="page-header-right">
+      <span id="res-polling-badge" style="display:none;">
+        <span class="polling-badge"><span class="polling-dot"></span>Live — polling every 1s</span>
+      </span>
+    </div>
+  </div>
+  <div class="content">
+    <div class="card">
+      <div class="result-summary" id="res-summary">
+        <div class="rs-item"><span class="rs-val" id="rs-total">—</span><span class="rs-label">Total</span></div>
+        <div class="rs-sep"></div>
+        <div class="rs-item"><span class="rs-val" style="color:#059669;" id="rs-passed">—</span><span class="rs-label">Passed</span></div>
+        <div class="rs-sep"></div>
+        <div class="rs-item"><span class="rs-val" style="color:var(--red);" id="rs-failed">—</span><span class="rs-label">Failed</span></div>
+        <div class="rs-sep"></div>
+        <div class="rs-item"><span class="rs-val" style="color:#92400e;" id="rs-running">—</span><span class="rs-label">Running</span></div>
+        <div class="rs-sep"></div>
+        <div class="rs-item"><span class="rs-val" id="rs-duration">—</span><span class="rs-label">Duration</span></div>
+      </div>
+      <div id="res-loading" class="loading">
+        <div class="spinner"></div>
+        <div class="loading-text">Fetching results…</div>
+      </div>
+      <div id="res-table-wrap" style="display:none;">
+        <table id="res-table">
+          <thead>
+            <tr>
+              <th style="width:32px;"></th>
+              <th>Test Plan / Job</th>
+              <th>Suite</th>
+              <th>Test Case</th>
+              <th class="th-center">Status</th>
+              <th class="th-center">Triggered By</th>
+              <th class="th-center">Triggered At</th>
+              <th class="th-center">Duration</th>
+              <th>Error</th>
+            </tr>
+          </thead>
+          <tbody id="res-tbody"></tbody>
+        </table>
+      </div>
+      <div id="res-empty" class="empty-state" style="display:none;">
+        <div class="empty-icon">⏳</div>
+        <div class="empty-title">No results yet</div>
+        <div class="empty-sub">Tests are queued and will appear here as they run.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════════════════════════════
+// MOCK DATA
+// Replace these objects with real API responses when integrating.
+//
+// API reference:
+//   GET  /test-automation/v1/test-plans
+//   GET  /test-automation/v1/test-plans/{planName}/jobs
+//   POST /test-automation/v1/test-plans/{planName}/jobs
+//   GET  /test-automation/v1/test-plans/{planName}/jobs/{jobId}/test-case-results
+// ══════════════════════════════════════════════════════════════════
+
+// Simulates: GET /test-automation/v1/test-plans
+// Response shape: { testPlans: [ { planName, description, testCaseDefinitions: [...] } ] }
+const MOCK_PLANS = [
+  {
+    planName: 'Registration API',
+    description: 'End-to-end tests covering user registration, validation, and duplicate handling.',
+    testCaseDefinitions: [
+      { testSuiteId: 'suite-reg-001', testSuiteDescription: 'Happy Path Registration', testSuiteOrder: 1,
+        testCaseId: 'tc-001', testCaseDescription: 'Register new user with valid payload', testCaseMethodName: 'testRegisterNewUser', testCaseOrder: 1 },
+      { testSuiteId: 'suite-reg-001', testSuiteDescription: 'Happy Path Registration', testSuiteOrder: 1,
+        testCaseId: 'tc-002', testCaseDescription: 'Verify confirmation email is sent', testCaseMethodName: 'testConfirmationEmailSent', testCaseOrder: 2 },
+      { testSuiteId: 'suite-reg-001', testSuiteDescription: 'Happy Path Registration', testSuiteOrder: 1,
+        testCaseId: 'tc-003', testCaseDescription: 'Retrieve newly created user profile', testCaseMethodName: 'testGetNewUserProfile', testCaseOrder: 3 },
+      { testSuiteId: 'suite-reg-002', testSuiteDescription: 'Validation & Error Handling', testSuiteOrder: 2,
+        testCaseId: 'tc-004', testCaseDescription: 'Register with missing required fields returns 400', testCaseMethodName: 'testRegisterMissingFields', testCaseOrder: 1 },
+      { testSuiteId: 'suite-reg-002', testSuiteDescription: 'Validation & Error Handling', testSuiteOrder: 2,
+        testCaseId: 'tc-005', testCaseDescription: 'Register with invalid email format returns 422', testCaseMethodName: 'testRegisterInvalidEmail', testCaseOrder: 2 },
+      { testSuiteId: 'suite-reg-002', testSuiteDescription: 'Validation & Error Handling', testSuiteOrder: 2,
+        testCaseId: 'tc-006', testCaseDescription: 'Register duplicate email returns 409', testCaseMethodName: 'testRegisterDuplicateEmail', testCaseOrder: 3 },
+    ]
+  },
+  {
+    planName: 'Login & Auth',
+    description: 'Authentication flows including login, token refresh, MFA, and session invalidation.',
+    testCaseDefinitions: [
+      { testSuiteId: 'suite-auth-001', testSuiteDescription: 'Login Flow', testSuiteOrder: 1,
+        testCaseId: 'tc-101', testCaseDescription: 'Login with valid credentials returns 200 + JWT', testCaseMethodName: 'testLoginSuccess', testCaseOrder: 1 },
+      { testSuiteId: 'suite-auth-001', testSuiteDescription: 'Login Flow', testSuiteOrder: 1,
+        testCaseId: 'tc-102', testCaseDescription: 'Login with wrong password returns 401', testCaseMethodName: 'testLoginWrongPassword', testCaseOrder: 2 },
+      { testSuiteId: 'suite-auth-001', testSuiteDescription: 'Login Flow', testSuiteOrder: 1,
+        testCaseId: 'tc-103', testCaseDescription: 'Login with unknown user returns 401', testCaseMethodName: 'testLoginUnknownUser', testCaseOrder: 3 },
+      { testSuiteId: 'suite-auth-002', testSuiteDescription: 'Token Lifecycle', testSuiteOrder: 2,
+        testCaseId: 'tc-104', testCaseDescription: 'Refresh token returns new access token', testCaseMethodName: 'testRefreshToken', testCaseOrder: 1 },
+      { testSuiteId: 'suite-auth-002', testSuiteDescription: 'Token Lifecycle', testSuiteOrder: 2,
+        testCaseId: 'tc-105', testCaseDescription: 'Expired token returns 401', testCaseMethodName: 'testExpiredToken', testCaseOrder: 2 },
+      { testSuiteId: 'suite-auth-003', testSuiteDescription: 'Session Management', testSuiteOrder: 3,
+        testCaseId: 'tc-106', testCaseDescription: 'Logout invalidates session', testCaseMethodName: 'testLogout', testCaseOrder: 1 },
+      { testSuiteId: 'suite-auth-003', testSuiteDescription: 'Session Management', testSuiteOrder: 3,
+        testCaseId: 'tc-107', testCaseDescription: 'Concurrent sessions are isolated', testCaseMethodName: 'testConcurrentSessions', testCaseOrder: 2 },
+    ]
+  },
+  {
+    planName: 'Policy Management',
+    description: 'CRUD operations and business rule validation for insurance policy records.',
+    testCaseDefinitions: [
+      { testSuiteId: 'suite-pol-001', testSuiteDescription: 'Policy CRUD', testSuiteOrder: 1,
+        testCaseId: 'tc-201', testCaseDescription: 'Create policy with valid data returns 201', testCaseMethodName: 'testCreatePolicy', testCaseOrder: 1 },
+      { testSuiteId: 'suite-pol-001', testSuiteDescription: 'Policy CRUD', testSuiteOrder: 1,
+        testCaseId: 'tc-202', testCaseDescription: 'Retrieve policy by ID', testCaseMethodName: 'testGetPolicyById', testCaseOrder: 2 },
+      { testSuiteId: 'suite-pol-001', testSuiteDescription: 'Policy CRUD', testSuiteOrder: 1,
+        testCaseId: 'tc-203', testCaseDescription: 'Update policy effective date', testCaseMethodName: 'testUpdatePolicyDate', testCaseOrder: 3 },
+      { testSuiteId: 'suite-pol-001', testSuiteDescription: 'Policy CRUD', testSuiteOrder: 1,
+        testCaseId: 'tc-204', testCaseDescription: 'Delete draft policy', testCaseMethodName: 'testDeleteDraftPolicy', testCaseOrder: 4 },
+      { testSuiteId: 'suite-pol-002', testSuiteDescription: 'Business Rules', testSuiteOrder: 2,
+        testCaseId: 'tc-205', testCaseDescription: 'Cannot activate policy without beneficiary', testCaseMethodName: 'testActivateNoBeneficiary', testCaseOrder: 1 },
+      { testSuiteId: 'suite-pol-002', testSuiteDescription: 'Business Rules', testSuiteOrder: 2,
+        testCaseId: 'tc-206', testCaseDescription: 'Coverage amount within underwriting limits', testCaseMethodName: 'testCoverageAmountLimits', testCaseOrder: 2 },
+    ]
+  },
+  {
+    planName: 'Claims Processing',
+    description: 'Claim submission, adjudication, and payout workflow tests.',
+    testCaseDefinitions: [
+      { testSuiteId: 'suite-clm-001', testSuiteDescription: 'Claim Submission', testSuiteOrder: 1,
+        testCaseId: 'tc-301', testCaseDescription: 'Submit valid claim returns 202 + claimId', testCaseMethodName: 'testSubmitClaim', testCaseOrder: 1 },
+      { testSuiteId: 'suite-clm-001', testSuiteDescription: 'Claim Submission', testSuiteOrder: 1,
+        testCaseId: 'tc-302', testCaseDescription: 'Submit claim with missing documents returns 400', testCaseMethodName: 'testSubmitClaimMissingDocs', testCaseOrder: 2 },
+      { testSuiteId: 'suite-clm-002', testSuiteDescription: 'Adjudication', testSuiteOrder: 2,
+        testCaseId: 'tc-303', testCaseDescription: 'Approved claim transitions to PAYOUT_PENDING', testCaseMethodName: 'testApprovedClaimStatus', testCaseOrder: 1 },
+      { testSuiteId: 'suite-clm-002', testSuiteDescription: 'Adjudication', testSuiteOrder: 2,
+        testCaseId: 'tc-304', testCaseDescription: 'Denied claim sends notification', testCaseMethodName: 'testDeniedClaimNotification', testCaseOrder: 2 },
+      { testSuiteId: 'suite-clm-003', testSuiteDescription: 'Payout', testSuiteOrder: 3,
+        testCaseId: 'tc-305', testCaseDescription: 'Payout initiated within SLA window', testCaseMethodName: 'testPayoutSLA', testCaseOrder: 1 },
+    ]
+  }
+];
+
+// Simulates: GET /test-automation/v1/test-plans/{planName}/jobs
+// Response shape: { jobs: [ { jobId, planName, description, status, triggeredBy, triggeredAtMs } ] }
+const MOCK_JOBS = {
+  'Registration API': [
+    { jobId: 'f3a9c1b2-1111-4d5e-a123-000000000001', planName: 'Registration API', description: 'Pre-release smoke run', status: 'COMPLETED', triggeredBy: 'jane.smith', triggeredAtMs: Date.now() - 3600000 * 2 },
+    { jobId: 'f3a9c1b2-2222-4d5e-a123-000000000002', planName: 'Registration API', description: 'Regression after hotfix-2.1.4', status: 'FAILED',    triggeredBy: 'john.doe',   triggeredAtMs: Date.now() - 3600000 * 5 },
+    { jobId: 'f3a9c1b2-3333-4d5e-a123-000000000003', planName: 'Registration API', description: 'Nightly regression',          status: 'COMPLETED', triggeredBy: 'ci-pipeline', triggeredAtMs: Date.now() - 3600000 * 26 },
+  ],
+  'Login & Auth': [
+    { jobId: 'a1b2c3d4-1111-4aaa-b000-000000000011', planName: 'Login & Auth', description: 'Auth hardening validation',   status: 'COMPLETED', triggeredBy: 'jane.smith', triggeredAtMs: Date.now() - 3600000 * 1 },
+    { jobId: 'a1b2c3d4-2222-4aaa-b000-000000000012', planName: 'Login & Auth', description: 'MFA feature branch smoke',     status: 'IN_PROGRESS', triggeredBy: 'mike.chen', triggeredAtMs: Date.now() - 60000 * 8 },
+  ],
+  'Policy Management': [
+    { jobId: 'bb11cc22-1111-4bbb-c000-000000000021', planName: 'Policy Management', description: 'Sprint 42 regression', status: 'COMPLETED', triggeredBy: 'ci-pipeline', triggeredAtMs: Date.now() - 3600000 * 12 },
+  ],
+  'Claims Processing': []
+};
+
+// Simulates: GET /test-automation/v1/test-plans/{planName}/jobs/{jobId}/test-case-results
+// Response shape: { testCaseResults: [ { testCaseResultId, testPlanJobId, testPlanName,
+//   testPlanJobDescription, testSuiteId, testSuiteDescription, testSuiteOrder,
+//   testCaseId, testCaseDescription, testCaseOrder, status, triggeredBy, triggeredAtMs,
+//   durationMs, request, expectedResponse, actualResponse, errorMessage } ] }
+const MOCK_RESULTS = {
+  'f3a9c1b2-1111-4d5e-a123-000000000001': [
+    { testCaseResultId:'r-001', testPlanJobId:'f3a9c1b2-1111-4d5e-a123-000000000001',
+      testPlanName:'Registration API', testPlanJobDescription:'Pre-release smoke run',
+      testSuiteId:'suite-reg-001', testSuiteDescription:'Happy Path Registration', testSuiteOrder:1,
+      testCaseId:'tc-001', testCaseDescription:'Register new user with valid payload', testCaseOrder:1,
+      status:'PASSED', triggeredBy:'jane.smith', triggeredAtMs: Date.now() - 3600000*2 - 5000,
+      durationMs:312,
+      request: JSON.stringify({method:'POST',url:'/api/v1/users/register',body:{email:'test@example.com',password:'S3cur3P@ss!',firstName:'John',lastName:'Doe'}},null,2),
+      expectedResponse: JSON.stringify({status:201,body:{userId:'usr-abc123',email:'test@example.com',status:'PENDING_VERIFICATION'}},null,2),
+      actualResponse:   JSON.stringify({status:201,body:{userId:'usr-abc123',email:'test@example.com',status:'PENDING_VERIFICATION'}},null,2),
+      errorMessage: null },
+    { testCaseResultId:'r-002', testPlanJobId:'f3a9c1b2-1111-4d5e-a123-000000000001',
+      testPlanName:'Registration API', testPlanJobDescription:'Pre-release smoke run',
+      testSuiteId:'suite-reg-001', testSuiteDescription:'Happy Path Registration', testSuiteOrder:1,
+      testCaseId:'tc-002', testCaseDescription:'Verify confirmation email is sent', testCaseOrder:2,
+      status:'PASSED', triggeredBy:'jane.smith', triggeredAtMs: Date.now() - 3600000*2 - 4000,
+      durationMs:88,
+      request: JSON.stringify({method:'GET',url:'/api/v1/users/usr-abc123/confirmation-status'},null,2),
+      expectedResponse: JSON.stringify({status:200,body:{emailSent:true,sentTo:'test@example.com'}},null,2),
+      actualResponse:   JSON.stringify({status:200,body:{emailSent:true,sentTo:'test@example.com'}},null,2),
+      errorMessage: null },
+    { testCaseResultId:'r-003', testPlanJobId:'f3a9c1b2-1111-4d5e-a123-000000000001',
+      testPlanName:'Registration API', testPlanJobDescription:'Pre-release smoke run',
+      testSuiteId:'suite-reg-001', testSuiteDescription:'Happy Path Registration', testSuiteOrder:1,
+      testCaseId:'tc-003', testCaseDescription:'Retrieve newly created user profile', testCaseOrder:3,
+      status:'PASSED', triggeredBy:'jane.smith', triggeredAtMs: Date.now() - 3600000*2 - 3000,
+      durationMs:145,
+      request: JSON.stringify({method:'GET',url:'/api/v1/users/usr-abc123',headers:{Authorization:'Bearer eyJhbGciOiJIUzI1NiJ9...'}},null,2),
+      expectedResponse: JSON.stringify({status:200,body:{userId:'usr-abc123',email:'test@example.com',firstName:'John',lastName:'Doe',createdAt:'2025-03-01T10:00:00Z'}},null,2),
+      actualResponse:   JSON.stringify({status:200,body:{userId:'usr-abc123',email:'test@example.com',firstName:'John',lastName:'Doe',createdAt:'2025-03-01T10:00:00Z'}},null,2),
+      errorMessage: null },
+    { testCaseResultId:'r-004', testPlanJobId:'f3a9c1b2-1111-4d5e-a123-000000000001',
+      testPlanName:'Registration API', testPlanJobDescription:'Pre-release smoke run',
+      testSuiteId:'suite-reg-002', testSuiteDescription:'Validation & Error Handling', testSuiteOrder:2,
+      testCaseId:'tc-004', testCaseDescription:'Register with missing required fields returns 400', testCaseOrder:1,
+      status:'PASSED', triggeredBy:'jane.smith', triggeredAtMs: Date.now() - 3600000*2 - 2000,
+      durationMs:97,
+      request: JSON.stringify({method:'POST',url:'/api/v1/users/register',body:{email:'incomplete@example.com'}},null,2),
+      expectedResponse: JSON.stringify({status:400,body:{error:'VALIDATION_ERROR',fields:['password','firstName','lastName']}},null,2),
+      actualResponse:   JSON.stringify({status:400,body:{error:'VALIDATION_ERROR',fields:['password','firstName','lastName']}},null,2),
+      errorMessage: null },
+    { testCaseResultId:'r-005', testPlanJobId:'f3a9c1b2-1111-4d5e-a123-000000000001',
+      testPlanName:'Registration API', testPlanJobDescription:'Pre-release smoke run',
+      testSuiteId:'suite-reg-002', testSuiteDescription:'Validation & Error Handling', testSuiteOrder:2,
+      testCaseId:'tc-005', testCaseDescription:'Register with invalid email format returns 422', testCaseOrder:2,
+      status:'PASSED', triggeredBy:'jane.smith', triggeredAtMs: Date.now() - 3600000*2 - 1500,
+      durationMs:74,
+      request: JSON.stringify({method:'POST',url:'/api/v1/users/register',body:{email:'not-an-email',password:'S3cur3P@ss!',firstName:'Jane',lastName:'Smith'}},null,2),
+      expectedResponse: JSON.stringify({status:422,body:{error:'INVALID_EMAIL_FORMAT',message:'Email address is not valid'}},null,2),
+      actualResponse:   JSON.stringify({status:422,body:{error:'INVALID_EMAIL_FORMAT',message:'Email address is not valid'}},null,2),
+      errorMessage: null },
+    { testCaseResultId:'r-006', testPlanJobId:'f3a9c1b2-1111-4d5e-a123-000000000001',
+      testPlanName:'Registration API', testPlanJobDescription:'Pre-release smoke run',
+      testSuiteId:'suite-reg-002', testSuiteDescription:'Validation & Error Handling', testSuiteOrder:2,
+      testCaseId:'tc-006', testCaseDescription:'Register duplicate email returns 409', testCaseOrder:3,
+      status:'PASSED', triggeredBy:'jane.smith', triggeredAtMs: Date.now() - 3600000*2 - 800,
+      durationMs:210,
+      request: JSON.stringify({method:'POST',url:'/api/v1/users/register',body:{email:'test@example.com',password:'S3cur3P@ss!',firstName:'John',lastName:'Doe'}},null,2),
+      expectedResponse: JSON.stringify({status:409,body:{error:'EMAIL_ALREADY_EXISTS',message:'An account with this email already exists'}},null,2),
+      actualResponse:   JSON.stringify({status:409,body:{error:'EMAIL_ALREADY_EXISTS',message:'An account with this email already exists'}},null,2),
+      errorMessage: null },
+  ],
+  'f3a9c1b2-2222-4d5e-a123-000000000002': [
+    { testCaseResultId:'r-011', testPlanJobId:'f3a9c1b2-2222-4d5e-a123-000000000002',
+      testPlanName:'Registration API', testPlanJobDescription:'Regression after hotfix-2.1.4',
+      testSuiteId:'suite-reg-001', testSuiteDescription:'Happy Path Registration', testSuiteOrder:1,
+      testCaseId:'tc-001', testCaseDescription:'Register new user with valid payload', testCaseOrder:1,
+      status:'PASSED', triggeredBy:'john.doe', triggeredAtMs: Date.now() - 3600000*5, durationMs:290,
+      request: JSON.stringify({method:'POST',url:'/api/v1/users/register',body:{email:'hotfix@example.com',password:'S3cur3P@ss!',firstName:'Fix',lastName:'Test'}},null,2),
+      expectedResponse: JSON.stringify({status:201,body:{userId:'usr-xyz789',email:'hotfix@example.com',status:'PENDING_VERIFICATION'}},null,2),
+      actualResponse:   JSON.stringify({status:201,body:{userId:'usr-xyz789',email:'hotfix@example.com',status:'PENDING_VERIFICATION'}},null,2),
+      errorMessage: null },
+    { testCaseResultId:'r-012', testPlanJobId:'f3a9c1b2-2222-4d5e-a123-000000000002',
+      testPlanName:'Registration API', testPlanJobDescription:'Regression after hotfix-2.1.4',
+      testSuiteId:'suite-reg-001', testSuiteDescription:'Happy Path Registration', testSuiteOrder:1,
+      testCaseId:'tc-002', testCaseDescription:'Verify confirmation email is sent', testCaseOrder:2,
+      status:'FAILED', triggeredBy:'john.doe', triggeredAtMs: Date.now() - 3600000*5 + 500, durationMs:5012,
+      request: JSON.stringify({method:'GET',url:'/api/v1/users/usr-xyz789/confirmation-status'},null,2),
+      expectedResponse: JSON.stringify({status:200,body:{emailSent:true,sentTo:'hotfix@example.com'}},null,2),
+      actualResponse:   JSON.stringify({status:503,body:{error:'SERVICE_UNAVAILABLE',message:'Email service is temporarily down','retryAfter':30}},null,2),
+      errorMessage: 'Expected status 200 but was 503 — email service unavailable' },
+    { testCaseResultId:'r-013', testPlanJobId:'f3a9c1b2-2222-4d5e-a123-000000000002',
+      testPlanName:'Registration API', testPlanJobDescription:'Regression after hotfix-2.1.4',
+      testSuiteId:'suite-reg-001', testSuiteDescription:'Happy Path Registration', testSuiteOrder:1,
+      testCaseId:'tc-003', testCaseDescription:'Retrieve newly created user profile', testCaseOrder:3,
+      status:'FAILED', triggeredBy:'john.doe', triggeredAtMs: Date.now() - 3600000*5 + 1000, durationMs:3300,
+      request: JSON.stringify({method:'GET',url:'/api/v1/users/usr-xyz789',headers:{Authorization:'Bearer eyJhbGciOiJIUzI1NiJ9...'}},null,2),
+      expectedResponse: JSON.stringify({status:200,body:{userId:'usr-xyz789',email:'hotfix@example.com',firstName:'Fix',lastName:'Test'}},null,2),
+      actualResponse:   JSON.stringify({status:200,body:{userId:'usr-xyz789',email:'hotfix@example.com',firstName:'Fix',lastName:'Test',userId:null}},null,2),
+      errorMessage: 'AssertionError: expected body.userId to not be null' },
+    { testCaseResultId:'r-014', testPlanJobId:'f3a9c1b2-2222-4d5e-a123-000000000002',
+      testPlanName:'Registration API', testPlanJobDescription:'Regression after hotfix-2.1.4',
+      testSuiteId:'suite-reg-002', testSuiteDescription:'Validation & Error Handling', testSuiteOrder:2,
+      testCaseId:'tc-004', testCaseDescription:'Register with missing required fields returns 400', testCaseOrder:1,
+      status:'PASSED', triggeredBy:'john.doe', triggeredAtMs: Date.now() - 3600000*5 + 1500, durationMs:88,
+      request: JSON.stringify({method:'POST',url:'/api/v1/users/register',body:{email:'incomplete@example.com'}},null,2),
+      expectedResponse: JSON.stringify({status:400,body:{error:'VALIDATION_ERROR'}},null,2),
+      actualResponse:   JSON.stringify({status:400,body:{error:'VALIDATION_ERROR'}},null,2),
+      errorMessage: null },
+    { testCaseResultId:'r-015', testPlanJobId:'f3a9c1b2-2222-4d5e-a123-000000000002',
+      testPlanName:'Registration API', testPlanJobDescription:'Regression after hotfix-2.1.4',
+      testSuiteId:'suite-reg-002', testSuiteDescription:'Validation & Error Handling', testSuiteOrder:2,
+      testCaseId:'tc-005', testCaseDescription:'Register with invalid email format returns 422', testCaseOrder:2,
+      status:'PASSED', triggeredBy:'john.doe', triggeredAtMs: Date.now() - 3600000*5 + 2000, durationMs:66,
+      request: JSON.stringify({method:'POST',url:'/api/v1/users/register',body:{email:'bad-email',password:'S3cur3P@ss!',firstName:'A',lastName:'B'}},null,2),
+      expectedResponse: JSON.stringify({status:422,body:{error:'INVALID_EMAIL_FORMAT'}},null,2),
+      actualResponse:   JSON.stringify({status:422,body:{error:'INVALID_EMAIL_FORMAT'}},null,2),
+      errorMessage: null },
+    { testCaseResultId:'r-016', testPlanJobId:'f3a9c1b2-2222-4d5e-a123-000000000002',
+      testPlanName:'Registration API', testPlanJobDescription:'Regression after hotfix-2.1.4',
+      testSuiteId:'suite-reg-002', testSuiteDescription:'Validation & Error Handling', testSuiteOrder:2,
+      testCaseId:'tc-006', testCaseDescription:'Register duplicate email returns 409', testCaseOrder:3,
+      status:'PASSED', triggeredBy:'john.doe', triggeredAtMs: Date.now() - 3600000*5 + 2500, durationMs:195,
+      request: JSON.stringify({method:'POST',url:'/api/v1/users/register',body:{email:'test@example.com',password:'S3cur3P@ss!',firstName:'Dup',lastName:'Test'}},null,2),
+      expectedResponse: JSON.stringify({status:409,body:{error:'EMAIL_ALREADY_EXISTS'}},null,2),
+      actualResponse:   JSON.stringify({status:409,body:{error:'EMAIL_ALREADY_EXISTS'}},null,2),
+      errorMessage: null },
+  ],
+  'f3a9c1b2-3333-4d5e-a123-000000000003': [
+    { testCaseResultId:'r-021', testPlanJobId:'f3a9c1b2-3333-4d5e-a123-000000000003',
+      testPlanName:'Registration API', testPlanJobDescription:'Nightly regression',
+      testSuiteId:'suite-reg-001', testSuiteDescription:'Happy Path Registration', testSuiteOrder:1,
+      testCaseId:'tc-001', testCaseDescription:'Register new user with valid payload', testCaseOrder:1,
+      status:'PASSED', triggeredBy:'ci-pipeline', triggeredAtMs: Date.now() - 3600000*26, durationMs:301,
+      request: JSON.stringify({method:'POST',url:'/api/v1/users/register',body:{email:'nightly@example.com',password:'S3cur3P@ss!',firstName:'Nightly',lastName:'Run'}},null,2),
+      expectedResponse: JSON.stringify({status:201,body:{userId:'usr-nightly01',status:'PENDING_VERIFICATION'}},null,2),
+      actualResponse:   JSON.stringify({status:201,body:{userId:'usr-nightly01',status:'PENDING_VERIFICATION'}},null,2),
+      errorMessage: null },
+    { testCaseResultId:'r-022', testPlanJobId:'f3a9c1b2-3333-4d5e-a123-000000000003',
+      testPlanName:'Registration API', testPlanJobDescription:'Nightly regression',
+      testSuiteId:'suite-reg-001', testSuiteDescription:'Happy Path Registration', testSuiteOrder:1,
+      testCaseId:'tc-002', testCaseDescription:'Verify confirmation email is sent', testCaseOrder:2,
+      status:'PASSED', triggeredBy:'ci-pipeline', triggeredAtMs: Date.now() - 3600000*26 + 500, durationMs:92,
+      request: JSON.stringify({method:'GET',url:'/api/v1/users/usr-nightly01/confirmation-status'},null,2),
+      expectedResponse: JSON.stringify({status:200,body:{emailSent:true}},null,2),
+      actualResponse:   JSON.stringify({status:200,body:{emailSent:true}},null,2),
+      errorMessage: null },
+    { testCaseResultId:'r-023', testPlanJobId:'f3a9c1b2-3333-4d5e-a123-000000000003',
+      testPlanName:'Registration API', testPlanJobDescription:'Nightly regression',
+      testSuiteId:'suite-reg-001', testSuiteDescription:'Happy Path Registration', testSuiteOrder:1,
+      testCaseId:'tc-003', testCaseDescription:'Retrieve newly created user profile', testCaseOrder:3,
+      status:'PASSED', triggeredBy:'ci-pipeline', triggeredAtMs: Date.now() - 3600000*26 + 1000, durationMs:140,
+      request: JSON.stringify({method:'GET',url:'/api/v1/users/usr-nightly01'},null,2),
+      expectedResponse: JSON.stringify({status:200,body:{userId:'usr-nightly01',email:'nightly@example.com'}},null,2),
+      actualResponse:   JSON.stringify({status:200,body:{userId:'usr-nightly01',email:'nightly@example.com'}},null,2),
+      errorMessage: null },
+    { testCaseResultId:'r-024', testPlanJobId:'f3a9c1b2-3333-4d5e-a123-000000000003',
+      testPlanName:'Registration API', testPlanJobDescription:'Nightly regression',
+      testSuiteId:'suite-reg-002', testSuiteDescription:'Validation & Error Handling', testSuiteOrder:2,
+      testCaseId:'tc-004', testCaseDescription:'Register with missing required fields returns 400', testCaseOrder:1,
+      status:'PASSED', triggeredBy:'ci-pipeline', triggeredAtMs: Date.now() - 3600000*26 + 1500, durationMs:81,
+      request: JSON.stringify({method:'POST',url:'/api/v1/users/register',body:{email:'only@example.com'}},null,2),
+      expectedResponse: JSON.stringify({status:400},null,2),
+      actualResponse:   JSON.stringify({status:400},null,2),
+      errorMessage: null },
+    { testCaseResultId:'r-025', testPlanJobId:'f3a9c1b2-3333-4d5e-a123-000000000003',
+      testPlanName:'Registration API', testPlanJobDescription:'Nightly regression',
+      testSuiteId:'suite-reg-002', testSuiteDescription:'Validation & Error Handling', testSuiteOrder:2,
+      testCaseId:'tc-005', testCaseDescription:'Register with invalid email format returns 422', testCaseOrder:2,
+      status:'PASSED', triggeredBy:'ci-pipeline', triggeredAtMs: Date.now() - 3600000*26 + 2000, durationMs:70,
+      request: JSON.stringify({method:'POST',url:'/api/v1/users/register',body:{email:'@@bad'}},null,2),
+      expectedResponse: JSON.stringify({status:422},null,2),
+      actualResponse:   JSON.stringify({status:422},null,2),
+      errorMessage: null },
+    { testCaseResultId:'r-026', testPlanJobId:'f3a9c1b2-3333-4d5e-a123-000000000003',
+      testPlanName:'Registration API', testPlanJobDescription:'Nightly regression',
+      testSuiteId:'suite-reg-002', testSuiteDescription:'Validation & Error Handling', testSuiteOrder:2,
+      testCaseId:'tc-006', testCaseDescription:'Register duplicate email returns 409', testCaseOrder:3,
+      status:'PASSED', triggeredBy:'ci-pipeline', triggeredAtMs: Date.now() - 3600000*26 + 2500, durationMs:188,
+      request: JSON.stringify({method:'POST',url:'/api/v1/users/register',body:{email:'dupe@example.com'}},null,2),
+      expectedResponse: JSON.stringify({status:409},null,2),
+      actualResponse:   JSON.stringify({status:409},null,2),
+      errorMessage: null },
+  ],
+  'a1b2c3d4-1111-4aaa-b000-000000000011': [
+    { testCaseResultId:'r-101', testPlanJobId:'a1b2c3d4-1111-4aaa-b000-000000000011',
+      testPlanName:'Login & Auth', testPlanJobDescription:'Auth hardening validation',
+      testSuiteId:'suite-auth-001', testSuiteDescription:'Login Flow', testSuiteOrder:1,
+      testCaseId:'tc-101', testCaseDescription:'Login with valid credentials returns 200 + JWT', testCaseOrder:1,
+      status:'PASSED', triggeredBy:'jane.smith', triggeredAtMs: Date.now() - 3600000, durationMs:220,
+      request: JSON.stringify({method:'POST',url:'/api/v1/auth/login',body:{email:'user@example.com',password:'P@ssw0rd!'}},null,2),
+      expectedResponse: JSON.stringify({status:200,body:{accessToken:'<jwt>',tokenType:'Bearer',expiresIn:3600}},null,2),
+      actualResponse:   JSON.stringify({status:200,body:{accessToken:'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VyQGV4YW1wbGUuY29tIn0.abc',tokenType:'Bearer',expiresIn:3600}},null,2),
+      errorMessage: null },
+    { testCaseResultId:'r-102', testPlanJobId:'a1b2c3d4-1111-4aaa-b000-000000000011',
+      testPlanName:'Login & Auth', testPlanJobDescription:'Auth hardening validation',
+      testSuiteId:'suite-auth-001', testSuiteDescription:'Login Flow', testSuiteOrder:1,
+      testCaseId:'tc-102', testCaseDescription:'Login with wrong password returns 401', testCaseOrder:2,
+      status:'PASSED', triggeredBy:'jane.smith', triggeredAtMs: Date.now() - 3600000 + 500, durationMs:105,
+      request: JSON.stringify({method:'POST',url:'/api/v1/auth/login',body:{email:'user@example.com',password:'wrongpassword'}},null,2),
+      expectedResponse: JSON.stringify({status:401,body:{error:'INVALID_CREDENTIALS'}},null,2),
+      actualResponse:   JSON.stringify({status:401,body:{error:'INVALID_CREDENTIALS',message:'Email or password is incorrect'}},null,2),
+      errorMessage: null },
+    { testCaseResultId:'r-103', testPlanJobId:'a1b2c3d4-1111-4aaa-b000-000000000011',
+      testPlanName:'Login & Auth', testPlanJobDescription:'Auth hardening validation',
+      testSuiteId:'suite-auth-001', testSuiteDescription:'Login Flow', testSuiteOrder:1,
+      testCaseId:'tc-103', testCaseDescription:'Login with unknown user returns 401', testCaseOrder:3,
+      status:'PASSED', triggeredBy:'jane.smith', triggeredAtMs: Date.now() - 3600000 + 1000, durationMs:99,
+      request: JSON.stringify({method:'POST',url:'/api/v1/auth/login',body:{email:'ghost@example.com',password:'P@ssw0rd!'}},null,2),
+      expectedResponse: JSON.stringify({status:401,body:{error:'INVALID_CREDENTIALS'}},null,2),
+      actualResponse:   JSON.stringify({status:401,body:{error:'INVALID_CREDENTIALS',message:'Email or password is incorrect'}},null,2),
+      errorMessage: null },
+    { testCaseResultId:'r-104', testPlanJobId:'a1b2c3d4-1111-4aaa-b000-000000000011',
+      testPlanName:'Login & Auth', testPlanJobDescription:'Auth hardening validation',
+      testSuiteId:'suite-auth-002', testSuiteDescription:'Token Lifecycle', testSuiteOrder:2,
+      testCaseId:'tc-104', testCaseDescription:'Refresh token returns new access token', testCaseOrder:1,
+      status:'PASSED', triggeredBy:'jane.smith', triggeredAtMs: Date.now() - 3600000 + 1500, durationMs:180,
+      request: JSON.stringify({method:'POST',url:'/api/v1/auth/refresh',body:{refreshToken:'eyJhbGciOiJIUzI1NiJ9.refresh.token'}},null,2),
+      expectedResponse: JSON.stringify({status:200,body:{accessToken:'<new-jwt>',expiresIn:3600}},null,2),
+      actualResponse:   JSON.stringify({status:200,body:{accessToken:'eyJhbGciOiJIUzI1NiJ9.new.token',expiresIn:3600}},null,2),
+      errorMessage: null },
+    { testCaseResultId:'r-105', testPlanJobId:'a1b2c3d4-1111-4aaa-b000-000000000011',
+      testPlanName:'Login & Auth', testPlanJobDescription:'Auth hardening validation',
+      testSuiteId:'suite-auth-002', testSuiteDescription:'Token Lifecycle', testSuiteOrder:2,
+      testCaseId:'tc-105', testCaseDescription:'Expired token returns 401', testCaseOrder:2,
+      status:'PASSED', triggeredBy:'jane.smith', triggeredAtMs: Date.now() - 3600000 + 2000, durationMs:134,
+      request: JSON.stringify({method:'GET',url:'/api/v1/profile',headers:{Authorization:'Bearer expired.token.here'}},null,2),
+      expectedResponse: JSON.stringify({status:401,body:{error:'TOKEN_EXPIRED'}},null,2),
+      actualResponse:   JSON.stringify({status:401,body:{error:'TOKEN_EXPIRED',message:'Access token has expired'}},null,2),
+      errorMessage: null },
+    { testCaseResultId:'r-106', testPlanJobId:'a1b2c3d4-1111-4aaa-b000-000000000011',
+      testPlanName:'Login & Auth', testPlanJobDescription:'Auth hardening validation',
+      testSuiteId:'suite-auth-003', testSuiteDescription:'Session Management', testSuiteOrder:3,
+      testCaseId:'tc-106', testCaseDescription:'Logout invalidates session', testCaseOrder:1,
+      status:'PASSED', triggeredBy:'jane.smith', triggeredAtMs: Date.now() - 3600000 + 2500, durationMs:244,
+      request: JSON.stringify({method:'POST',url:'/api/v1/auth/logout',headers:{Authorization:'Bearer valid.token.here'}},null,2),
+      expectedResponse: JSON.stringify({status:204,body:null},null,2),
+      actualResponse:   JSON.stringify({status:204,body:null},null,2),
+      errorMessage: null },
+    { testCaseResultId:'r-107', testPlanJobId:'a1b2c3d4-1111-4aaa-b000-000000000011',
+      testPlanName:'Login & Auth', testPlanJobDescription:'Auth hardening validation',
+      testSuiteId:'suite-auth-003', testSuiteDescription:'Session Management', testSuiteOrder:3,
+      testCaseId:'tc-107', testCaseDescription:'Concurrent sessions are isolated', testCaseOrder:2,
+      status:'PASSED', triggeredBy:'jane.smith', triggeredAtMs: Date.now() - 3600000 + 3000, durationMs:388,
+      request: JSON.stringify({method:'GET',url:'/api/v1/profile',headers:{Authorization:'Bearer session-A-token'}},null,2),
+      expectedResponse: JSON.stringify({status:200,body:{sessionId:'session-A',userId:'usr-abc123'}},null,2),
+      actualResponse:   JSON.stringify({status:200,body:{sessionId:'session-A',userId:'usr-abc123'}},null,2),
+      errorMessage: null },
+  ],
+  'a1b2c3d4-2222-4aaa-b000-000000000012': [
+    { testCaseResultId:'r-111', testPlanJobId:'a1b2c3d4-2222-4aaa-b000-000000000012',
+      testPlanName:'Login & Auth', testPlanJobDescription:'MFA feature branch smoke',
+      testSuiteId:'suite-auth-001', testSuiteDescription:'Login Flow', testSuiteOrder:1,
+      testCaseId:'tc-101', testCaseDescription:'Login with valid credentials returns 200 + JWT', testCaseOrder:1,
+      status:'PASSED', triggeredBy:'mike.chen', triggeredAtMs: Date.now() - 60000*8, durationMs:215,
+      request: JSON.stringify({method:'POST',url:'/api/v1/auth/login',body:{email:'mfa-test@example.com',password:'P@ssw0rd!'}},null,2),
+      expectedResponse: JSON.stringify({status:200,body:{accessToken:'<jwt>',tokenType:'Bearer'}},null,2),
+      actualResponse:   JSON.stringify({status:200,body:{accessToken:'eyJhbGciOiJIUzI1NiJ9.mfa.token',tokenType:'Bearer',expiresIn:3600}},null,2),
+      errorMessage: null },
+    { testCaseResultId:'r-112', testPlanJobId:'a1b2c3d4-2222-4aaa-b000-000000000012',
+      testPlanName:'Login & Auth', testPlanJobDescription:'MFA feature branch smoke',
+      testSuiteId:'suite-auth-001', testSuiteDescription:'Login Flow', testSuiteOrder:1,
+      testCaseId:'tc-102', testCaseDescription:'Login with wrong password returns 401', testCaseOrder:2,
+      status:'STARTED', triggeredBy:'mike.chen', triggeredAtMs: null, durationMs: null,
+      request: JSON.stringify({method:'POST',url:'/api/v1/auth/login',body:{email:'mfa-test@example.com',password:'wrong'}},null,2),
+      expectedResponse: JSON.stringify({status:401,body:{error:'INVALID_CREDENTIALS'}},null,2),
+      actualResponse: null, errorMessage: null },
+    { testCaseResultId:'r-113', testPlanJobId:'a1b2c3d4-2222-4aaa-b000-000000000012',
+      testPlanName:'Login & Auth', testPlanJobDescription:'MFA feature branch smoke',
+      testSuiteId:'suite-auth-001', testSuiteDescription:'Login Flow', testSuiteOrder:1,
+      testCaseId:'tc-103', testCaseDescription:'Login with unknown user returns 401', testCaseOrder:3,
+      status:'STARTED', triggeredBy:'mike.chen', triggeredAtMs: null, durationMs: null,
+      request: JSON.stringify({method:'POST',url:'/api/v1/auth/login',body:{email:'ghost@example.com',password:'P@ssw0rd!'}},null,2),
+      expectedResponse: JSON.stringify({status:401,body:{error:'INVALID_CREDENTIALS'}},null,2),
+      actualResponse: null, errorMessage: null },
+  ],
+  'bb11cc22-1111-4bbb-c000-000000000021': [
+    { testCaseResultId:'r-201', testPlanJobId:'bb11cc22-1111-4bbb-c000-000000000021',
+      testPlanName:'Policy Management', testPlanJobDescription:'Sprint 42 regression',
+      testSuiteId:'suite-pol-001', testSuiteDescription:'Policy CRUD', testSuiteOrder:1,
+      testCaseId:'tc-201', testCaseDescription:'Create policy with valid data returns 201', testCaseOrder:1,
+      status:'PASSED', triggeredBy:'ci-pipeline', triggeredAtMs: Date.now() - 3600000*12, durationMs:450,
+      request: JSON.stringify({method:'POST',url:'/api/v1/policies',body:{policyType:'TERM_LIFE',coverageAmount:500000,beneficiaryId:'bnf-001',effectiveDate:'2025-04-01'}},null,2),
+      expectedResponse: JSON.stringify({status:201,body:{policyId:'pol-abc001',status:'DRAFT'}},null,2),
+      actualResponse:   JSON.stringify({status:201,body:{policyId:'pol-abc001',status:'DRAFT',createdAt:'2025-03-01T12:00:00Z'}},null,2),
+      errorMessage: null },
+    { testCaseResultId:'r-202', testPlanJobId:'bb11cc22-1111-4bbb-c000-000000000021',
+      testPlanName:'Policy Management', testPlanJobDescription:'Sprint 42 regression',
+      testSuiteId:'suite-pol-001', testSuiteDescription:'Policy CRUD', testSuiteOrder:1,
+      testCaseId:'tc-202', testCaseDescription:'Retrieve policy by ID', testCaseOrder:2,
+      status:'PASSED', triggeredBy:'ci-pipeline', triggeredAtMs: Date.now() - 3600000*12 + 1000, durationMs:120,
+      request: JSON.stringify({method:'GET',url:'/api/v1/policies/pol-abc001',headers:{Authorization:'Bearer agent.token'}},null,2),
+      expectedResponse: JSON.stringify({status:200,body:{policyId:'pol-abc001',policyType:'TERM_LIFE',coverageAmount:500000}},null,2),
+      actualResponse:   JSON.stringify({status:200,body:{policyId:'pol-abc001',policyType:'TERM_LIFE',coverageAmount:500000,status:'DRAFT'}},null,2),
+      errorMessage: null },
+    { testCaseResultId:'r-203', testPlanJobId:'bb11cc22-1111-4bbb-c000-000000000021',
+      testPlanName:'Policy Management', testPlanJobDescription:'Sprint 42 regression',
+      testSuiteId:'suite-pol-001', testSuiteDescription:'Policy CRUD', testSuiteOrder:1,
+      testCaseId:'tc-203', testCaseDescription:'Update policy effective date', testCaseOrder:3,
+      status:'PASSED', triggeredBy:'ci-pipeline', triggeredAtMs: Date.now() - 3600000*12 + 2000, durationMs:330,
+      request: JSON.stringify({method:'PATCH',url:'/api/v1/policies/pol-abc001',body:{effectiveDate:'2025-05-01'}},null,2),
+      expectedResponse: JSON.stringify({status:200,body:{policyId:'pol-abc001',effectiveDate:'2025-05-01'}},null,2),
+      actualResponse:   JSON.stringify({status:200,body:{policyId:'pol-abc001',effectiveDate:'2025-05-01',updatedAt:'2025-03-01T12:05:00Z'}},null,2),
+      errorMessage: null },
+    { testCaseResultId:'r-204', testPlanJobId:'bb11cc22-1111-4bbb-c000-000000000021',
+      testPlanName:'Policy Management', testPlanJobDescription:'Sprint 42 regression',
+      testSuiteId:'suite-pol-001', testSuiteDescription:'Policy CRUD', testSuiteOrder:1,
+      testCaseId:'tc-204', testCaseDescription:'Delete draft policy', testCaseOrder:4,
+      status:'PASSED', triggeredBy:'ci-pipeline', triggeredAtMs: Date.now() - 3600000*12 + 3000, durationMs:198,
+      request: JSON.stringify({method:'DELETE',url:'/api/v1/policies/pol-draft001'},null,2),
+      expectedResponse: JSON.stringify({status:204,body:null},null,2),
+      actualResponse:   JSON.stringify({status:204,body:null},null,2),
+      errorMessage: null },
+    { testCaseResultId:'r-205', testPlanJobId:'bb11cc22-1111-4bbb-c000-000000000021',
+      testPlanName:'Policy Management', testPlanJobDescription:'Sprint 42 regression',
+      testSuiteId:'suite-pol-002', testSuiteDescription:'Business Rules', testSuiteOrder:2,
+      testCaseId:'tc-205', testCaseDescription:'Cannot activate policy without beneficiary', testCaseOrder:1,
+      status:'PASSED', triggeredBy:'ci-pipeline', triggeredAtMs: Date.now() - 3600000*12 + 4000, durationMs:275,
+      request: JSON.stringify({method:'POST',url:'/api/v1/policies/pol-no-bnf/activate'},null,2),
+      expectedResponse: JSON.stringify({status:422,body:{error:'MISSING_BENEFICIARY'}},null,2),
+      actualResponse:   JSON.stringify({status:422,body:{error:'MISSING_BENEFICIARY',message:'Policy must have at least one beneficiary before activation'}},null,2),
+      errorMessage: null },
+    { testCaseResultId:'r-206', testPlanJobId:'bb11cc22-1111-4bbb-c000-000000000021',
+      testPlanName:'Policy Management', testPlanJobDescription:'Sprint 42 regression',
+      testSuiteId:'suite-pol-002', testSuiteDescription:'Business Rules', testSuiteOrder:2,
+      testCaseId:'tc-206', testCaseDescription:'Coverage amount within underwriting limits', testCaseOrder:2,
+      status:'FAILED', triggeredBy:'ci-pipeline', triggeredAtMs: Date.now() - 3600000*12 + 5000, durationMs:6100,
+      request: JSON.stringify({method:'POST',url:'/api/v1/policies',body:{policyType:'WHOLE_LIFE',coverageAmount:10000000,beneficiaryId:'bnf-002'}},null,2),
+      expectedResponse: JSON.stringify({status:200,body:{underwritingApproved:true,coverageAmount:10000000}},null,2),
+      actualResponse:   JSON.stringify({status:500,body:{error:'INTERNAL_SERVER_ERROR',message:'Underwriting service timeout after 6000ms'}},null,2),
+      errorMessage: 'Expected 200 but got 500 — underwriting service timeout after 6000ms' },
+  ]
+};
+
+// ══════════════════════════════════════
+// STATE
+// ══════════════════════════════════════
+let currentPlan  = null;
+let allTestCases = [];
+let selectedIds  = new Set();
+let currentJobId = null;
+// In-memory job store: jobs added via "Run Selected" are pushed here
+const runtimeJobs = {};
+
+// ══════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════
+function goTo(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function switchInnerTab(id, btn) {
+  document.querySelectorAll('.inner-tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('#page-plan .tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('inner-' + id).classList.add('active');
+  btn.classList.add('active');
+  if (id === 'job-history') loadJobs();
+}
+
+// ══════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════
+let toastTimer;
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'show' + (type ? ' toast-' + type : '');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.className = '', 3200);
+}
+
+// ══════════════════════════════════════
+// PAGE 1 — TEST PLANS
+// GET /test-automation/v1/test-plans
+// ══════════════════════════════════════
+let allPlans = [];
+
+function loadPlans() {
+  hide('plans-table-section'); hide('plans-empty'); show('plans-loading');
+  setTimeout(() => {
+    hide('plans-loading');
+    allPlans = MOCK_PLANS;
+    if (!allPlans.length) { show('plans-empty'); return; }
+    show('plans-table-section');
+    renderPlansTable(allPlans);
+  }, 400);
+}
+
+function renderPlansTable(plans) {
+  const total = plans.length;
+  document.getElementById('plans-count-label').textContent =
+    `${total} plan${total !== 1 ? 's' : ''}`;
+
+  const tbody = document.getElementById('plans-tbody');
+  const noMatch = document.getElementById('plans-no-match');
+
+  if (!total) {
+    tbody.innerHTML = '';
+    show('plans-no-match');
+    return;
+  }
+  hide('plans-no-match');
+
+  tbody.innerHTML = plans.map(plan => {
+    const idx     = MOCK_PLANS.indexOf(plan);
+    const tcCount = plan.testCaseDefinitions.length;
+    return `
+      <tr class="tr-clickable" onclick="openPlan(${idx})">
+        <td><div class="td-name">${esc(plan.planName)}</div></td>
+        <td class="td-light" style="max-width:380px;">${esc(plan.description)}</td>
+        <td class="td-center"><span class="result-order">${tcCount}</span></td>
+        <td class="td-center">
+          <button class="btn btn-primary btn-sm"
+                  onclick="event.stopPropagation();openPlan(${idx})">Open →</button>
+        </td>
+      </tr>`;
+  }).join('');
+}
+
+function filterPlans(query) {
+  const q = query.trim().toLowerCase();
+  const filtered = q
+    ? allPlans.filter(p =>
+        p.planName.toLowerCase().includes(q) ||
+        p.description.toLowerCase().includes(q))
+    : allPlans;
+  renderPlansTable(filtered);
+}
+
+function openPlan(idx) {
+  const plan = MOCK_PLANS[idx];
+  currentPlan  = plan;
+  allTestCases = plan.testCaseDefinitions;
+  selectedIds.clear();
+
+  document.getElementById('plan-breadcrumb').textContent = plan.planName;
+  document.getElementById('plan-hero-title').textContent = plan.planName;
+  document.getElementById('plan-hero-sub').textContent   = plan.description;
+
+  const suites = new Set(allTestCases.map(tc => tc.testSuiteId)).size;
+  const jobs   = getAllJobsForPlan(plan.planName);
+  document.getElementById('stat-total').textContent  = allTestCases.length;
+  document.getElementById('stat-suites').textContent = suites;
+  document.getElementById('stat-jobs').textContent   = jobs.length;
+  document.getElementById('stat-last').textContent   = jobs[0]?.status || '—';
+  show('plan-stats');
+
+  // Reset to Test Cases tab (scope to plan page only)
+  document.querySelectorAll('#page-plan .tab-btn').forEach((b,i) => b.classList.toggle('active', i===0));
+  document.querySelectorAll('.inner-tab-panel').forEach((p,i) => p.classList.toggle('active', i===0));
+
+  renderTestCases();
+  goTo('plan');
+}
+
+// ══════════════════════════════════════
+// PAGE 2 — TEST CASES TABLE
+// ══════════════════════════════════════
+function renderTestCases() {
+  const sorted = [...allTestCases].sort((a,b) =>
+    (a.testSuiteOrder - b.testSuiteOrder) || (a.testCaseOrder - b.testCaseOrder)
+  );
+  document.getElementById('tc-tbody').innerHTML = sorted.map(tc => {
+    const id = tc.testCaseId;
+    return `
+      <tr class="tr-clickable" id="tr-${id}" onclick="toggleRow('${id}')">
+        <td><div class="cb" id="cb-${id}" onclick="event.stopPropagation();toggleRow('${id}')"><span class="cb-check">✓</span></div></td>
+        <td>
+          <div class="td-name">${esc(tc.testSuiteDescription)}</div>
+          <div class="td-mono">${esc(tc.testSuiteId)}</div>
+        </td>
+        <td>
+          <div class="td-name">${esc(tc.testCaseDescription)}</div>
+          <div class="td-mono">${esc(tc.testCaseId)}</div>
+        </td>
+        <td class="td-mono">${esc(tc.testCaseMethodName)}</td>
+        <td class="td-center result-order">${tc.testSuiteOrder}</td>
+        <td class="td-center result-order">${tc.testCaseOrder}</td>
+      </tr>`;
+  }).join('');
+  hide('tc-loading'); show('tc-table-wrap'); hide('tc-empty');
+  updateSelectionUI();
+}
+
+function toggleRow(id) {
+  if (selectedIds.has(id)) selectedIds.delete(id);
+  else selectedIds.add(id);
+  document.getElementById('cb-' + id)?.classList.toggle('checked', selectedIds.has(id));
+  document.getElementById('tr-' + id)?.classList.toggle('tr-selected', selectedIds.has(id));
+  updateSelectionUI();
+}
+
+function toggleAll() {
+  const all = allTestCases.map(tc => tc.testCaseId);
+  if (selectedIds.size === all.length) selectedIds.clear();
+  else all.forEach(id => selectedIds.add(id));
+  allTestCases.forEach(tc => {
+    document.getElementById('cb-' + tc.testCaseId)?.classList.toggle('checked', selectedIds.has(tc.testCaseId));
+    document.getElementById('tr-' + tc.testCaseId)?.classList.toggle('tr-selected', selectedIds.has(tc.testCaseId));
+  });
+  updateSelectionUI();
+}
+
+function updateSelectionUI() {
+  const n = selectedIds.size, total = allTestCases.length;
+  document.getElementById('sel-count').textContent =
+    n === 0 ? 'Select test cases to run' :
+    n === total ? `All ${total} test cases selected` : `${n} of ${total} selected`;
+  document.getElementById('run-btn').disabled = n === 0;
+  const cbAll = document.getElementById('cb-all');
+  cbAll.classList.remove('checked','partial');
+  if (n === total) cbAll.classList.add('checked');
+  else if (n > 0) cbAll.classList.add('partial');
+}
+
+// ══════════════════════════════════════
+// TRIGGER JOB RUN
+// POST /test-automation/v1/test-plans/{planName}/jobs
+// Body: { description, triggeredBy, testCaseIds: [...] }
+// Response: { jobId }
+// ══════════════════════════════════════
+function triggerRun() {
+  if (!selectedIds.size) return;
+  const planName = currentPlan.planName;
+  const btn = document.getElementById('run-btn');
+  btn.disabled = true; btn.textContent = '⏳ Triggering…';
+
+  // Simulate async POST — in real use, replace with fetch()
+  setTimeout(() => {
+    const jobId = 'job-' + Date.now();
+    const newJob = {
+      jobId,
+      planName,
+      description: `Manual run — ${new Date().toLocaleString()}`,
+      status: 'IN_PROGRESS',
+      triggeredBy: 'dashboard-user',
+      triggeredAtMs: Date.now(),
+      selectedTestCaseIds: [...selectedIds]
+    };
+
+    // Store in runtime jobs (in-memory)
+    if (!runtimeJobs[planName]) runtimeJobs[planName] = [];
+    runtimeJobs[planName].unshift(newJob);
+
+    // Build mock results for selected test cases (all start as STARTED)
+    const selectedTCs = allTestCases.filter(tc => selectedIds.has(tc.testCaseId));
+    const mockResults = selectedTCs.map((tc, i) => ({
+      testCaseResultId: `r-runtime-${i}`,
+      testPlanJobId: jobId,
+      testPlanName: planName,
+      testPlanJobDescription: `Manual run — ${new Date().toLocaleString()}`,
+      testSuiteId: tc.testSuiteId,
+      testSuiteDescription: tc.testSuiteDescription,
+      testSuiteOrder: tc.testSuiteOrder,
+      testCaseId: tc.testCaseId,
+      testCaseDescription: tc.testCaseDescription,
+      testCaseOrder: tc.testCaseOrder,
+      status: 'STARTED',
+      triggeredBy: 'dashboard-user',
+      triggeredAtMs: null,
+      durationMs: null,
+      request: JSON.stringify({method:'POST',url:`/api/v1/test/${tc.testCaseId}`,body:{}},null,2),
+      expectedResponse: JSON.stringify({status:200,body:{result:'PASSED'}},null,2),
+      actualResponse: null,
+      errorMessage: null
+    }));
+    MOCK_RESULTS[jobId] = mockResults;
+
+    // Simulate tests completing after a delay
+    simulateJobCompletion(jobId, planName);
+
+    showToast(`Job triggered! ID: ${jobId.slice(0,18)}…`, 'success');
+    btn.disabled = false; btn.textContent = '▶ Run Selected';
+
+    // Switch to job history and refresh
+    document.querySelectorAll('#page-plan .tab-btn').forEach((b,i) => b.classList.toggle('active', i===1));
+    document.querySelectorAll('.inner-tab-panel').forEach((p,i) => p.classList.toggle('active', i===1));
+    loadJobs();
+  }, 800);
+}
+
+// Simulate test results resolving one by one
+function simulateJobCompletion(jobId, planName) {
+  const results = MOCK_RESULTS[jobId];
+  if (!results) return;
+  results.forEach((r, i) => {
+    setTimeout(() => {
+      r.status = Math.random() > 0.15 ? 'PASSED' : 'FAILED';
+      r.durationMs = Math.floor(Math.random() * 500) + 50;
+      r.triggeredAtMs = Date.now();
+      if (r.status === 'FAILED') {
+        r.errorMessage = 'AssertionError: expected 200 but got 500';
+        r.actualResponse = JSON.stringify({status:500,body:{error:'INTERNAL_SERVER_ERROR'}},null,2);
+      } else {
+        r.actualResponse = JSON.stringify({status:200,body:{result:'PASSED'}},null,2);
+      }
+
+      // Mark job COMPLETED when last test finishes
+      if (i === results.length - 1) {
+        const allJobs = getAllJobsForPlan(planName);
+        const job = allJobs.find(j => j.jobId === jobId);
+        if (job) {
+          const hasFail = results.some(r => r.status === 'FAILED');
+          job.status = hasFail ? 'FAILED' : 'COMPLETED';
+        }
+      }
+    }, (i + 1) * 1200);
+  });
+}
+
+// ══════════════════════════════════════
+// PAGE 2 — JOB HISTORY
+// GET /test-automation/v1/test-plans/{planName}/jobs
+// Response: { jobs: [ { jobId, planName, description, status, triggeredBy, triggeredAtMs } ] }
+// ══════════════════════════════════════
+function loadJobs() {
+  if (!currentPlan) return;
+  const planName = currentPlan.planName;
+  const jobs = getAllJobsForPlan(planName);
+
+  document.getElementById('jobs-count').textContent = jobs.length;
+  document.getElementById('stat-jobs').textContent  = jobs.length;
+  if (jobs[0]) document.getElementById('stat-last').textContent = jobs[0].status;
+
+  if (!jobs.length) { hide('jobs-table-wrap'); show('jobs-empty'); return; }
+  hide('jobs-empty'); show('jobs-table-wrap');
+
+  document.getElementById('jobs-tbody').innerHTML = jobs.map(job => {
+    const ts      = new Date(job.triggeredAtMs).toLocaleString();
+    const shortId = job.jobId.slice(0, 12) + '…';
+    return `
+      <tr>
+        <td><span class="job-link" title="${esc(job.jobId)}" onclick="openJobResults('${esc(job.jobId)}')">${esc(shortId)}</span></td>
+        <td class="td-name">${esc(job.description)}</td>
+        <td>${statusToChip(job.status)}</td>
+        <td class="td-light">${esc(job.triggeredBy)}</td>
+        <td class="td-light">${esc(ts)}</td>
+        <td class="td-center">
+          <button class="btn btn-primary btn-sm" onclick="openJobResults('${esc(job.jobId)}')">View →</button>
+        </td>
+      </tr>`;
+  }).join('');
+}
+
+// Merge static mock jobs + any runtime-triggered jobs for a plan
+function getAllJobsForPlan(planName) {
+  const staticJobs  = MOCK_JOBS[planName] || [];
+  const dynamicJobs = runtimeJobs[planName] || [];
+  return [...dynamicJobs, ...staticJobs];
+}
+
+// ══════════════════════════════════════
+// PAGE 3 — JOB RESULTS
+// GET /test-automation/v1/test-plans/{planName}/jobs/{jobId}/test-case-results
+// Response: { testCaseResults: [ { testCaseResultId, status, durationMs, errorMessage, ... } ] }
+// ══════════════════════════════════════
+function openJobResults(jobId) {
+  currentJobId = jobId;
+  const planName = currentPlan?.planName || '';
+
+  document.getElementById('res-plan-crumb').textContent    = planName;
+  document.getElementById('res-job-id-display').textContent = `Job ID: ${jobId}`;
+
+  hide('res-table-wrap'); hide('res-empty'); show('res-loading');
+  document.getElementById('rs-total').textContent   = '—';
+  document.getElementById('rs-passed').textContent  = '—';
+  document.getElementById('rs-failed').textContent  = '—';
+  document.getElementById('rs-running').textContent = '—';
+  document.getElementById('rs-duration').textContent = '—';
+
+  goTo('results');
+
+  // Simulate loading delay
+  setTimeout(() => {
+    hide('res-loading');
+    renderJobResults(jobId);
+    // If job still has STARTED tests, poll
+    pollResults(jobId);
+  }, 500);
+}
+
+function renderJobResults(jobId) {
+  const results = MOCK_RESULTS[jobId] || [];
+  const passed  = results.filter(r => r.status === 'PASSED').length;
+  const failed  = results.filter(r => r.status === 'FAILED').length;
+  const started = results.filter(r => r.status === 'STARTED').length;
+
+  document.getElementById('rs-total').textContent   = results.length;
+  document.getElementById('rs-passed').textContent  = passed;
+  document.getElementById('rs-failed').textContent  = failed;
+  document.getElementById('rs-running').textContent = started;
+
+  const totalMs = results.reduce((s,r) => s + (r.durationMs || 0), 0);
+  document.getElementById('rs-duration').textContent = totalMs ? totalMs + 'ms' : '—';
+
+  if (!results.length) { show('res-empty'); hide('res-table-wrap'); return; }
+  hide('res-empty'); show('res-table-wrap');
+
+  const sorted = [...results].sort((a,b) =>
+    (a.testSuiteOrder - b.testSuiteOrder) || (a.testCaseOrder - b.testCaseOrder)
+  );
+
+  document.getElementById('res-tbody').innerHTML = sorted.map((r, i) => {
+    const rid  = esc(r.testCaseResultId);
+    const dur  = r.durationMs != null ? `${r.durationMs}ms` : '<span class="td-light">—</span>';
+    const ts   = r.triggeredAtMs ? new Date(r.triggeredAtMs).toLocaleString() : '<span class="td-light">—</span>';
+    const err  = r.errorMessage
+      ? `<div class="error-msg" title="${esc(r.errorMessage)}">${esc(r.errorMessage)}</div>`
+      : '<span class="td-light">—</span>';
+
+    const detailRow = buildDetailPanel(r, rid);
+
+    return `
+      <tr class="tr-clickable" onclick="toggleDetail('${rid}', this)">
+        <td><button class="expand-btn" id="ebtn-${rid}">+</button></td>
+        <td>
+          <div class="td-name" style="font-size:11px;">${esc(r.testPlanName || '—')}</div>
+          <div class="td-mono">${esc(r.testPlanJobId || '—')}</div>
+          <div class="td-light" style="font-size:11px;">${esc(r.testPlanJobDescription || '')}</div>
+        </td>
+        <td>
+          <div class="td-name">${esc(r.testSuiteDescription)}</div>
+          <div class="td-mono">${esc(r.testSuiteId || '')}</div>
+          <div class="td-light" style="font-size:10px;">Order: ${r.testSuiteOrder}</div>
+        </td>
+        <td>
+          <div class="td-name">${esc(r.testCaseDescription)}</div>
+          <div class="td-mono">${esc(r.testCaseId || '')}</div>
+          <div class="td-light" style="font-size:10px;">Order: ${r.testCaseOrder}</div>
+        </td>
+        <td class="td-center">${statusToChip(r.status)}</td>
+        <td class="td-center td-light">${esc(r.triggeredBy || '—')}</td>
+        <td class="td-center duration-cell">${ts}</td>
+        <td class="td-center duration-cell">${dur}</td>
+        <td>${err}</td>
+      </tr>
+      <tr class="detail-row" id="drow-${rid}">
+        <td colspan="9">${detailRow}</td>
+      </tr>`;
+  }).join('');
+}
+
+function buildDetailPanel(r, rid) {
+  const fields = [
+    ['testCaseResultId', r.testCaseResultId],
+    ['testPlanName',     r.testPlanName],
+    ['testPlanJobId',    r.testPlanJobId],
+    ['testPlanJobDescription', r.testPlanJobDescription],
+    ['testSuiteId',      r.testSuiteId],
+    ['testSuiteDescription', r.testSuiteDescription],
+    ['testSuiteOrder',   r.testSuiteOrder],
+    ['testCaseId',       r.testCaseId],
+    ['testCaseDescription', r.testCaseDescription],
+    ['testCaseOrder',    r.testCaseOrder],
+    ['status',           r.status],
+    ['triggeredBy',      r.triggeredBy],
+    ['triggeredAtMs',    r.triggeredAtMs != null ? r.triggeredAtMs + ` (${new Date(r.triggeredAtMs).toLocaleString()})` : null],
+    ['durationMs',       r.durationMs != null ? r.durationMs + 'ms' : null],
+    ['errorMessage',     r.errorMessage],
+  ];
+
+  const metaHtml = fields.map(([k, v]) => `
+    <div class="detail-field">
+      <div class="detail-label">${esc(k)}</div>
+      <div class="detail-value ${k === 'status' ? 'highlight' : ''}">${v != null ? esc(String(v)) : '<span style="color:var(--border2)">null</span>'}</div>
+    </div>`).join('');
+
+  const jsonBlock = (label, jsonStr, blockId) => {
+    if (!jsonStr) return `
+      <div class="detail-field">
+        <div class="detail-label">${label}</div>
+        <div class="detail-value" style="color:var(--border2)">null</div>
+      </div>`;
+    const safe = esc(jsonStr);
+    const highlighted = syntaxHighlight(jsonStr);
+    return `
+      <div>
+        <div class="detail-label" style="margin-bottom:6px;">${label}</div>
+        <div class="json-block-wrap">
+          <button class="json-toggle-btn" id="jtbtn-${blockId}" onclick="toggleJson('${blockId}')">
+            <span class="jt-icon">▶</span> View JSON
+          </button>
+          <pre class="json-pre" id="jpre-${blockId}">${highlighted}</pre>
+        </div>
+      </div>`;
+  };
+
+  return `<div class="detail-panel" id="dpanel-${rid}">
+    <div class="detail-section-title">📋 Result Fields</div>
+    <div class="detail-grid">${metaHtml}</div>
+    <div class="detail-section-title">🔗 Request / Response</div>
+    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:20px;">
+      ${jsonBlock('request', r.request, rid+'-req')}
+      ${jsonBlock('expectedResponse', r.expectedResponse, rid+'-exp')}
+      ${jsonBlock('actualResponse', r.actualResponse, rid+'-act')}
+    </div>
+  </div>`;
+}
+
+function toggleDetail(rid, row) {
+  const panel  = document.getElementById('dpanel-' + rid);
+  const btn    = document.getElementById('ebtn-' + rid);
+  const isOpen = panel && panel.classList.contains('open');
+  if (isOpen) {
+    panel.classList.remove('open');
+    btn.classList.remove('open');
+    btn.textContent = '+';
+  } else {
+    panel.classList.add('open');
+    btn.classList.add('open');
+    btn.textContent = '−';
+  }
+}
+
+function toggleJson(blockId) {
+  const pre = document.getElementById('jpre-' + blockId);
+  const btn = document.getElementById('jtbtn-' + blockId);
+  const isOpen = pre.classList.contains('open');
+  pre.classList.toggle('open', !isOpen);
+  btn.classList.toggle('open', !isOpen);
+  btn.querySelector('.jt-icon').textContent = isOpen ? '▶' : '▼';
+  btn.childNodes[1].textContent = isOpen ? ' View JSON' : ' Hide JSON';
+}
+
+function syntaxHighlight(json) {
+  try {
+    const obj = JSON.parse(json);
+    const str = JSON.stringify(obj, null, 2);
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, match => {
+        if (/^"/.test(match)) {
+          if (/:$/.test(match)) return `<span class="json-key">${match}</span>`;
+          return `<span class="json-str">${match}</span>`;
+        }
+        if (/true|false/.test(match)) return `<span class="json-bool">${match}</span>`;
+        if (/null/.test(match))       return `<span class="json-null">${match}</span>`;
+        return `<span class="json-num">${match}</span>`;
+      });
+  } catch(e) {
+    return esc(json);
+  }
+}
+
+// Live-poll for runtime-triggered jobs while STARTED tests remain
+let pollTimer = null;
+function pollResults(jobId) {
+  clearTimeout(pollTimer);
+  const results = MOCK_RESULTS[jobId] || [];
+  const hasStarted = results.some(r => r.status === 'STARTED');
+
+  if (hasStarted) {
+    show('res-polling-badge');
+    pollTimer = setTimeout(() => {
+      if (document.getElementById('page-results').classList.contains('active') && currentJobId === jobId) {
+        renderJobResults(jobId);
+        pollResults(jobId);
+      }
+    }, 1000);
+  } else {
+    hide('res-polling-badge');
+  }
+}
+
+// ══════════════════════════════════════
+// HELPERS
+// ══════════════════════════════════════
+function statusToChip(status) {
+  const s = (status || '').toUpperCase();
+  if (s === 'PASSED' || s === 'COMPLETED')
+    return `<span class="chip chip-green"><span class="chip-dot"></span>${s}</span>`;
+  if (s === 'FAILED')
+    return `<span class="chip chip-red"><span class="chip-dot"></span>${s}</span>`;
+  if (s === 'STARTED' || s === 'IN_PROGRESS')
+    return `<span class="chip chip-yellow"><span class="chip-dot"></span>${s}</span>`;
+  return `<span class="chip chip-gray"><span class="chip-dot"></span>${s || '—'}</span>`;
+}
+function show(id) { const el=document.getElementById(id); if(el) el.style.display=''; }
+function hide(id) { const el=document.getElementById(id); if(el) el.style.display='none'; }
+function esc(s)   { return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// ══════════════════════════════════════
+// INIT
+// ══════════════════════════════════════
+loadPlans();
+</script>
+</body>
+</html>
