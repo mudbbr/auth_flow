@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>API Test Automation — Executive Overview</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy:   #003865;
+  --navy2:  #00254d;
+  --red:    #e31837;
+  --gold:   #c8972b;
+  --white:  #ffffff;
+  --off:    #f7f8fa;
+  --ink:    #0f1923;
+  --muted:  #5a6a7e;
+  --border: #dde3ec;
+  --chaos:  #ff4757;
+  --chaos2: #ff6b81;
+  --serif:  'DM Serif Display', serif;
+  --sans:   'DM Sans', sans-serif;
+  --mono:   'DM Mono', monospace;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: var(--sans);
+  background: var(--off);
+  color: var(--ink);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ─── PAGE WRAPPER ─── */
+.page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 64px 48px 80px;
+}
+
+/* ─── HEADER ─── */
+.header {
+  margin-bottom: 72px;
+  position: relative;
+}
+.header-eyebrow {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--red);
+  font-weight: 500;
+  margin-bottom: 16px;
+}
+.header-title {
+  font-family: var(--serif);
+  font-size: 38px;
+  line-height: 1.1;
+  color: var(--navy);
+  white-space: nowrap;
+  margin-bottom: 20px;
+}
+.header-title em {
+  font-style: italic;
+  color: var(--red);
+}
+.header-sub {
+  font-size: 16px;
+  color: var(--muted);
+  max-width: 560px;
+  line-height: 1.7;
+  font-weight: 300;
+}
+.header-rule {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 3px;
+  height: 100%;
+  background: linear-gradient(to bottom, var(--red), transparent);
+  opacity: 0.3;
+}
+
+/* ─── SECTION LABEL ─── */
+.section-label {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 28px;
+}
+.sl-num {
+  font-family: var(--serif);
+  font-size: 48px;
+  line-height: 1;
+  color: var(--border);
+  font-weight: 400;
+  flex-shrink: 0;
+}
+.sl-body {}
+.sl-title {
+  font-family: var(--serif);
+  font-size: 22px;
+  color: var(--navy);
+  line-height: 1.2;
+}
+.sl-sub {
+  font-size: 13px;
+  color: var(--muted);
+  margin-top: 2px;
+  font-weight: 300;
+}
+
+/* ─── CHAOS ZONE ─── */
+.chaos-zone {
+  background: white;
+  border: 1px solid var(--border);
+  border-top: 4px solid var(--chaos);
+  border-radius: 10px;
+  padding: 36px;
+  margin-bottom: 20px;
+  position: relative;
+  overflow: hidden;
+}
+.chaos-zone::before {
+  content: '';
+  position: absolute;
+  top: 0; right: 0;
+  width: 320px; height: 320px;
+  background: radial-gradient(circle at top right, rgba(255,71,87,0.04) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.chaos-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.chaos-card {
+  background: #fff8f8;
+  border: 1px solid #ffd4d9;
+  border-radius: 8px;
+  padding: 20px;
+  position: relative;
+  transition: transform 0.2s;
+}
+.chaos-card:hover { transform: translateY(-2px); }
+
+.cc-icon {
+  font-size: 22px;
+  margin-bottom: 10px;
+  display: block;
+}
+.cc-tool {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--chaos);
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+.cc-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 6px;
+  line-height: 1.3;
+}
+.cc-desc {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.6;
+  font-weight: 300;
+}
+
+.cc-pain {
+  display: inline-block;
+  margin-top: 10px;
+  font-size: 10px;
+  font-weight: 600;
+  font-family: var(--mono);
+  color: var(--chaos);
+  background: #fff0f1;
+  border: 1px solid #ffcdd2;
+  padding: 2px 8px;
+  border-radius: 3px;
+  letter-spacing: 0.3px;
+}
+
+/* isolation strip */
+.isolation-strip {
+  background: #fff0f1;
+  border: 1px dashed #ffb3bb;
+  border-radius: 6px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.is-icon { font-size: 18px; flex-shrink: 0; }
+.is-text {
+  font-size: 13px;
+  color: #8b1a27;
+  line-height: 1.6;
+  font-weight: 400;
+}
+.is-text strong { font-weight: 600; }
+
+/* ─── DIVIDER ARROW ─── */
+.transform-bridge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 28px 0;
+}
+.tb-line {
+  width: 2px;
+  height: 40px;
+  background: linear-gradient(to bottom, var(--border), var(--navy));
+}
+.tb-badge {
+  background: var(--navy);
+  color: white;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 6px 18px;
+  border-radius: 20px;
+}
+.tb-arrow {
+  font-size: 20px;
+  color: var(--navy);
+  line-height: 1;
+}
+
+/* ─── FRAMEWORK ZONE ─── */
+.framework-zone {
+  background: white;
+  border: 1px solid var(--border);
+  border-top: 4px solid var(--navy);
+  border-radius: 10px;
+  padding: 36px;
+  margin-bottom: 20px;
+  position: relative;
+  overflow: hidden;
+}
+.framework-zone::before {
+  content: '';
+  position: absolute;
+  top: 0; right: 0;
+  width: 400px; height: 400px;
+  background: radial-gradient(circle at top right, rgba(0,56,101,0.04) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* central diagram */
+.orbit-diagram {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-bottom: 32px;
+}
+
+.orbit-tools {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex-shrink: 0;
+  width: 190px;
+}
+.orbit-tool {
+  background: var(--off);
+  border: 1.5px solid var(--border);
+  border-radius: 6px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--navy);
+  transition: border-color 0.2s;
+}
+.orbit-tool:hover { border-color: var(--navy); }
+.ot-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.ot-dot.jest    { background: #f0db4f; border: 1px solid #c9b800; }
+.ot-dot.ra      { background: #4caf50; border: 1px solid #388e3c; }
+.ot-dot.jmeter  { background: #d32f2f; border: 1px solid #b71c1c; }
+.ot-dot.postman { background: #ef6c00; border: 1px solid #e65100; }
+.ot-dot.custom  { background: #7b1fa2; border: 1px solid #6a1b9a; }
+
+.orbit-connectors {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+  padding: 0 4px;
+  gap: 0;
+  position: relative;
+  height: 220px;
+}
+
+.connector-line {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+.connector-line::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0;
+  height: 1.5px;
+  background: linear-gradient(to right, var(--border), var(--navy) 80%, transparent);
+}
+.connector-arrow {
+  position: absolute;
+  right: 0;
+  font-size: 12px;
+  color: var(--navy);
+  opacity: 0.7;
+}
+
+.orbit-core {
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  background: var(--navy);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 8px 40px rgba(0,56,101,0.3);
+  position: relative;
+}
+.orbit-core::before {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  border: 1.5px dashed rgba(0,56,101,0.25);
+}
+.oc-label {
+  font-family: var(--serif);
+  font-size: 14px;
+  color: white;
+  text-align: center;
+  line-height: 1.3;
+}
+.oc-sub {
+  font-size: 9px;
+  font-family: var(--mono);
+  color: rgba(255,255,255,0.55);
+  text-align: center;
+  margin-top: 4px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+/* capabilities grid */
+.cap-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+.cap-card {
+  background: var(--off);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 18px 16px;
+  border-top: 3px solid var(--navy);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.cap-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0,56,101,0.1);
+}
+.cap-icon { font-size: 20px; margin-bottom: 10px; display: block; }
+.cap-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--navy);
+  margin-bottom: 5px;
+  line-height: 1.3;
+}
+.cap-desc {
+  font-size: 11.5px;
+  color: var(--muted);
+  line-height: 1.6;
+  font-weight: 300;
+}
+
+/* ─── IMPACT ROW ─── */
+.impact-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 52px;
+  margin-bottom: 52px;
+}
+.impact-card {
+  background: var(--navy);
+  border-radius: 10px;
+  padding: 28px 24px;
+  position: relative;
+  overflow: hidden;
+}
+.impact-card::before {
+  content: '';
+  position: absolute;
+  bottom: -20px; right: -20px;
+  width: 100px; height: 100px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.04);
+}
+.ic-num {
+  font-family: var(--serif);
+  font-size: 44px;
+  color: var(--gold);
+  line-height: 1;
+  margin-bottom: 8px;
+}
+.ic-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: white;
+  margin-bottom: 6px;
+}
+.ic-desc {
+  font-size: 12px;
+  color: rgba(255,255,255,0.55);
+  line-height: 1.6;
+  font-weight: 300;
+}
+
+/* ─── BEFORE/AFTER TABLE ─── */
+.compare-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  margin-bottom: 52px;
+}
+.compare-table th {
+  padding: 14px 20px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  font-family: var(--mono);
+}
+.compare-table th:first-child {
+  background: #fff5f5;
+  color: var(--chaos);
+  border-right: 1px solid var(--border);
+  width: 50%;
+}
+.compare-table th:last-child {
+  background: #e8eef6;
+  color: var(--navy);
+}
+.compare-table td {
+  padding: 13px 20px;
+  font-size: 13px;
+  vertical-align: top;
+  line-height: 1.6;
+  border-top: 1px solid var(--border);
+}
+.compare-table td:first-child {
+  color: #8b2e2e;
+  background: white;
+  border-right: 1px solid var(--border);
+}
+.compare-table td:last-child {
+  color: var(--navy);
+  background: #fbfcfe;
+  font-weight: 500;
+}
+.compare-table td:first-child::before { content: '✕  '; opacity: 0.5; }
+.compare-table td:last-child::before  { content: '✓  '; color: var(--navy); opacity: 0.7; }
+
+/* ─── FOOTER NOTE ─── */
+.footer-note {
+  background: linear-gradient(135deg, var(--navy), var(--navy2));
+  border-radius: 10px;
+  padding: 36px 40px;
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  position: relative;
+  overflow: hidden;
+}
+.footer-note::before {
+  content: '';
+  position: absolute;
+  right: -40px; top: -40px;
+  width: 200px; height: 200px;
+  border-radius: 50%;
+  background: rgba(200,151,43,0.1);
+}
+.fn-accent {
+  width: 4px;
+  height: 80px;
+  background: var(--gold);
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+.fn-quote {
+  font-family: var(--serif);
+  font-size: 22px;
+  color: white;
+  line-height: 1.4;
+  font-style: italic;
+  flex: 1;
+}
+.fn-quote em { color: var(--gold); font-style: normal; }
+
+/* ─── ANIMATIONS ─── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.header         { animation: fadeUp 0.6s ease both; }
+.chaos-zone     { animation: fadeUp 0.6s 0.1s ease both; }
+.transform-bridge { animation: fadeUp 0.6s 0.2s ease both; }
+.framework-zone { animation: fadeUp 0.6s 0.3s ease both; }
+.impact-row     { animation: fadeUp 0.6s 0.4s ease both; }
+.compare-wrap   { animation: fadeUp 0.6s 0.5s ease both; }
+.footer-note    { animation: fadeUp 0.6s 0.6s ease both; }
+
+/* pulse on core */
+@keyframes pulse-ring {
+  0%   { transform: scale(1);   opacity: 0.4; }
+  100% { transform: scale(1.12); opacity: 0; }
+}
+.orbit-core::after {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  border: 2px solid rgba(0,56,101,0.4);
+  animation: pulse-ring 2.5s ease-out infinite;
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-rule"></div>
+    <h1 class="header-title">From Fragmented Tools to a Unified Testing Practice</h1>
+    <p class="header-sub">How a lightweight orchestration framework consolidates isolated API testing efforts — improving visibility, code quality, and team scalability without rebuilding from scratch.</p>
+  </div>
+
+  <!-- SECTION 1: THE PROBLEM -->
+  <div class="section-label">
+    <div class="sl-num">01</div>
+    <div class="sl-body">
+      <div class="sl-title">The Fragmented Reality</div>
+      <div class="sl-sub">Tests existed — but scattered, ungovernable, and impossible to scale</div>
+    </div>
+  </div>
+
+  <div class="chaos-zone">
+    <div class="chaos-grid">
+
+      <div class="chaos-card">
+        <span class="cc-icon">📄</span>
+        <div class="cc-tool">JMeter</div>
+        <div class="cc-title">XML Files Are Not Code-Reviewable</div>
+        <div class="cc-desc">JMeter exports tests as XML. Even stored in source control, a meaningful code review is impossible — changes are buried in machine-generated markup no engineer can assess at a glance.</div>
+        <span class="cc-pain">Unreviable · Unreadable</span>
+      </div>
+
+      <div class="chaos-card">
+        <span class="cc-icon">🗂️</span>
+        <div class="cc-tool">Source Control</div>
+        <div class="cc-title">Source Control Alone Isn't Enough</div>
+        <div class="cc-desc">Storing JMeter XML in a repo gives version history but not quality control. There's no way to enforce standards, catch regressions in test logic, or understand what changed between runs.</div>
+        <span class="cc-pain">No Effective Review</span>
+      </div>
+
+      <div class="chaos-card">
+        <span class="cc-icon">📊</span>
+        <div class="cc-tool">Results Visibility</div>
+        <div class="cc-title">No Single View of Test Health</div>
+        <div class="cc-desc">To understand API quality you had to open JMeter, check a Jest HTML report, maybe a Postman collection export. No aggregated view existed.</div>
+        <span class="cc-pain">No Observability</span>
+      </div>
+
+      <div class="chaos-card">
+        <span class="cc-icon">⚙️</span>
+        <div class="cc-tool">Local-Only Execution</div>
+        <div class="cc-title">Built for a Laptop, Not a Pipeline</div>
+        <div class="cc-desc">Most tools were set up and run locally. Plugging them into CI/CD required custom glue for each tool — and often just never happened, leaving automated coverage to individual initiative.</div>
+        <span class="cc-pain">Not CI/CD Ready</span>
+      </div>
+
+      <div class="chaos-card">
+        <span class="cc-icon">📈</span>
+        <div class="cc-tool">Growth Exposure</div>
+        <div class="cc-title">No Foundation for Team Growth</div>
+        <div class="cc-desc">What works for one team breaks across many. As APIs multiply and teams grow, isolated tools create duplicated effort, conflicting standards, and no shared view of overall API health.</div>
+        <span class="cc-pain">Doesn't Scale</span>
+      </div>
+
+    </div>
+
+    <div class="isolation-strip">
+      <div class="is-icon">⚠️</div>
+      <div class="is-text">
+        <strong>Root cause:</strong> Not a lack of testing effort — a lack of <strong>centralized orchestration</strong>. Teams were testing, but results couldn't be aggregated, code couldn't be reviewed properly, and there was no shared vocabulary for what "API test coverage" meant.
+      </div>
+    </div>
+  </div>
+
+  <!-- BRIDGE -->
+  <div class="transform-bridge">
+    <div class="tb-line"></div>
+    <div class="tb-badge">The Response — Not Ground Zero. A Smart Bridge.</div>
+    <div class="tb-arrow">↓</div>
+  </div>
+
+  <!-- SECTION 2: THE SOLUTION -->
+  <div class="section-label">
+    <div class="sl-num">02</div>
+    <div class="sl-body">
+      <div class="sl-title">The Unified Framework</div>
+      <div class="sl-sub">Existing tools kept. A lightweight orchestration layer added on top.</div>
+    </div>
+  </div>
+
+  <div class="framework-zone">
+
+    <!-- orbit diagram -->
+    <div class="orbit-diagram">
+      <div class="orbit-tools">
+        <div class="orbit-tool"><span class="ot-dot jmeter"></span>JMeter</div>
+        <div class="orbit-tool"><span class="ot-dot postman"></span>Postman / Newman</div>
+        <div class="orbit-tool"><span class="ot-dot custom"></span>Custom Scripts</div>
+      </div>
+
+      <div class="orbit-connectors">
+        <div class="connector-line"><span class="connector-arrow">→</span></div>
+        <div class="connector-line"><span class="connector-arrow">→</span></div>
+        <div class="connector-line"><span class="connector-arrow">→</span></div>
+      </div>
+
+      <div class="orbit-core">
+        <div class="oc-label">API Test<br>Automation<br>Framework</div>
+        <div class="oc-sub">Spring Boot</div>
+      </div>
+
+      <div style="flex:1; padding-left:32px;">
+        <div style="font-family:var(--serif);font-size:18px;color:var(--navy);margin-bottom:12px;line-height:1.4;">One place to register, run, and observe every test across every tool.</div>
+        <div style="font-size:13px;color:var(--muted);line-height:1.8;font-weight:300;">
+          Built in weeks, not quarters. Existing tools and test investments are preserved — the framework brings them under a single execution model with centralized visibility, history, and control.
+        </div>
+      </div>
+    </div>
+
+    <!-- cap grid -->
+    <div class="cap-grid">
+      <div class="cap-card">
+        <span class="cap-icon">🗃️</span>
+        <div class="cap-title">Source Code First</div>
+        <div class="cap-desc">Tests live as proper Java classes — reviewable, diffable, branchable. PR reviews are meaningful again.</div>
+      </div>
+      <div class="cap-card">
+        <span class="cap-icon">📡</span>
+        <div class="cap-title">Live Result Dashboard</div>
+        <div class="cap-desc">Every test run streams results in real time. Pass/fail, duration, request & response — all in one UI, all persisted.</div>
+      </div>
+      <div class="cap-card">
+        <span class="cap-icon">🔁</span>
+        <div class="cap-title">REST API Trigger</div>
+        <div class="cap-desc">Any CI pipeline or developer can trigger a test plan via a single POST. No tool-specific knowledge required.</div>
+      </div>
+      <div class="cap-card">
+        <span class="cap-icon">📋</span>
+        <div class="cap-title">Test Plan Management</div>
+        <div class="cap-desc">Tests are grouped into named plans. Run a subset, run everything — with full history and job tracking.</div>
+      </div>
+      <div class="cap-card">
+        <span class="cap-icon">📈</span>
+        <div class="cap-title">Execution History</div>
+        <div class="cap-desc">Every job is persisted. Trend analysis, regression identification, and audit trails become possible immediately.</div>
+      </div>
+      <div class="cap-card">
+        <span class="cap-icon">⚡</span>
+        <div class="cap-title">Async by Default</div>
+        <div class="cap-desc">Tests run in a background thread pool. The API returns immediately with a jobId — no blocking, no timeouts.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- IMPACT -->
+  <div class="impact-row">
+    <div class="impact-card">
+      <div class="ic-num">↓ Friction</div>
+      <div class="ic-title">Code Review Quality</div>
+      <div class="ic-desc">From unreadable XML diffs to clean, structured Java. Reviews take minutes, not hours — and actually catch real issues.</div>
+    </div>
+    <div class="impact-card">
+      <div class="ic-num">↑ Visibility</div>
+      <div class="ic-title">Cross-Team Observability</div>
+      <div class="ic-desc">One dashboard surfaces results from all registered test plans. Leadership and QA leads see the full picture without chasing reports.</div>
+    </div>
+    <div class="impact-card">
+      <div class="ic-num">→ Scale</div>
+      <div class="ic-title">New Teams Onboard Fast</div>
+      <div class="ic-desc">Adding a new API test suite is just annotating a class. The framework handles everything else — no tool setup, no pipeline plumbing.</div>
+    </div>
+  </div>
+
+  <!-- BEFORE / AFTER -->
+  <div class="compare-wrap">
+    <div class="section-label" style="margin-bottom:20px;">
+      <div class="sl-num">03</div>
+      <div class="sl-body">
+        <div class="sl-title">Before vs. After</div>
+        <div class="sl-sub">The same team, the same effort — with dramatically different outcomes</div>
+      </div>
+    </div>
+
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th>Before — Fragmented</th>
+          <th>After — Unified Framework</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Test Results in JMeter</td>
+          <td>All results flow into one dashboard via API driven</td>
+        </tr>
+        <tr>
+          <td>Code reviews on XML files — practically impossible to spot defects</td>
+          <td>Organic tech stack — tests written in code, easy to review, version-controlled, and manageable like any other software asset</td>
+        </tr>
+        <tr>
+          <td>Running tests required knowing which tool, where it lived, and how to interpret output</td>
+          <td>Triggered directly through the IAM Services Portal — no tool expertise required</td>
+        </tr>
+        <tr>
+          <td>No shared standard for test structure across teams</td>
+          <td>@TestSuite / @TestCase annotations provide a universal, lightweight contract</td>
+        </tr>
+        <tr>
+          <td>No historical record — re-running failed tests meant starting from scratch</td>
+          <td>Full job history with request, expected, actual, duration — per test case</td>
+        </tr>
+        <tr>
+          <td>Scaling to new teams or APIs requires replicating tribal knowledge</td>
+          <td>New test plans onboard in hours — annotation model is self-describing</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- FOOTER QUOTE -->
+  <div class="footer-note">
+    <div class="fn-accent"></div>
+    <div class="fn-quote">
+      This isn't a rewrite of how we test. It's the <em>connective tissue</em> that was always missing — turning isolated testing efforts into a coordinated, observable, and scalable practice.
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
