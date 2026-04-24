@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IAM Architecture Diagram</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;700;800&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #050d1a;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    font-family: 'Syne', sans-serif;
+    padding: 16px;
+  }
+  .title {
+    color: #7eb8f7;
+    font-size: clamp(9px, 2vw, 13px);
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    text-align: center;
+    opacity: 0;
+    animation: fadeIn 0.6s 0.2s forwards;
+  }
+  .svg-wrapper { width: 100%; max-width: 860px; }
+  svg#diagram { width: 100%; height: auto; display: block; overflow: visible; }
+  .node-glow { opacity: 0.2; animation: nodePulse 2.5s ease-in-out infinite; }
+  @keyframes nodePulse { 0%,100%{opacity:0.15} 50%{opacity:0.45} }
+  @keyframes fadeIn { to{opacity:1} }
+</style>
+</head>
+<body>
+<div class="title">IAM &middot; Account Registration &amp; Event Flow Architecture &middot; V2</div>
+<div class="svg-wrapper">
+<!-- Layout (all y coords):
+  Row 1: MyPru, CIAM Services, IdP        y=80..170   center=125
+  Row 2: Identity Event Bus            y=260..350  center=305  cx=412
+  Row 3: Business Intelligence         y=420..510  center=465  cx=412
+  viewBox height = 560 (incl legend)
+-->
+<svg id="diagram" viewBox="0 0 860 560" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#0c1e35" stroke-width="1"/>
+    </pattern>
+    <linearGradient id="gradMyPru" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a3060"/><stop offset="100%" style="stop-color:#071e42"/>
+    </linearGradient>
+    <linearGradient id="gradCIAM" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#003d6e"/><stop offset="100%" style="stop-color:#001f3f"/>
+    </linearGradient>
+    <linearGradient id="gradIdP" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#003358"/><stop offset="100%" style="stop-color:#001829"/>
+    </linearGradient>
+    <linearGradient id="gradIBus" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a2040"/><stop offset="100%" style="stop-color:#041530"/>
+    </linearGradient>
+    <linearGradient id="gradBI" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#082838"/><stop offset="100%" style="stop-color:#031520"/>
+    </linearGradient>
+    <marker id="arrow-blue" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#2a7fff"/>
+    </marker>
+    <marker id="arrow-cyan" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#00b8d9"/>
+    </marker>
+    <marker id="arrow-teal" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#00d4aa"/>
+    </marker>
+    <filter id="glow-blue" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <radialGradient id="vignette" cx="50%" cy="60%" r="70%">
+      <stop offset="0%" style="stop-color:#0a1f38;stop-opacity:0"/>
+      <stop offset="100%" style="stop-color:#020810;stop-opacity:0.7"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="860" height="560" fill="#050d1a"/>
+  <rect width="860" height="560" fill="url(#grid)"/>
+  <rect width="860" height="560" fill="url(#vignette)"/>
+
+  <!-- ─── ROW 1 ─── MyPru / CIAM Services / IdP  (center y=125) ─── -->
+
+  <!-- MyPru  cx=95  x=18..168 -->
+  <g class="node-mypru" style="opacity:0;transition:opacity 0.5s">
+    <rect class="node-glow" x="18" y="80" width="154" height="90" rx="14" fill="#1a6aff"/>
+    <rect x="22" y="84" width="146" height="82" rx="12" fill="url(#gradMyPru)" stroke="#2a6acd" stroke-width="1.5"/>
+    <text x="95" y="113" font-family="Syne,sans-serif" font-weight="700" font-size="22" text-anchor="middle" dominant-baseline="middle">&#x1F6E1;&#xFE0F;</text>
+    <text x="95" y="137" font-family="Syne,sans-serif" font-weight="700" font-size="15" fill="#e8f4ff" text-anchor="middle" dominant-baseline="middle">MyPru</text>
+    <text x="95" y="154" font-family="JetBrains Mono,monospace" font-size="10" fill="#5a8ab0" text-anchor="middle" dominant-baseline="middle">Customer App</text>
+  </g>
+
+  <!-- CIAM Services  cx=420  x=328..512 -->
+  <g class="node-ciam" style="opacity:0;transition:opacity 0.5s 0.15s">
+    <rect class="node-glow" x="328" y="80" width="184" height="90" rx="14" fill="#0080ff" style="animation-delay:0.3s"/>
+    <rect x="332" y="84" width="176" height="82" rx="12" fill="url(#gradCIAM)" stroke="#1a7aff" stroke-width="1.5"/>
+    <text x="420" y="113" font-family="Syne,sans-serif" font-weight="700" font-size="20" text-anchor="middle" dominant-baseline="middle">&#x26A1;</text>
+    <text x="420" y="137" font-family="Syne,sans-serif" font-weight="700" font-size="15" fill="#e8f4ff" text-anchor="middle" dominant-baseline="middle">CIAM Services</text>
+    <text x="420" y="154" font-family="JetBrains Mono,monospace" font-size="10" fill="#5a8ab0" text-anchor="middle" dominant-baseline="middle">Auth &amp; Identity</text>
+  </g>
+
+  <!-- IdP  cx=746  x=658..834 -->
+  <g class="node-idp" style="opacity:0;transition:opacity 0.5s 0.3s">
+    <rect class="node-glow" x="658" y="80" width="176" height="90" rx="14" fill="#005fcc" style="animation-delay:0.6s"/>
+    <rect x="662" y="84" width="168" height="82" rx="12" fill="url(#gradIdP)" stroke="#1a5faa" stroke-width="1.5"/>
+    <text x="746" y="113" font-family="Syne,sans-serif" font-weight="700" font-size="20" text-anchor="middle" dominant-baseline="middle">&#x1F510;</text>
+    <text x="746" y="137" font-family="Syne,sans-serif" font-weight="700" font-size="15" fill="#e8f4ff" text-anchor="middle" dominant-baseline="middle">IdP</text>
+    <text x="746" y="154" font-family="JetBrains Mono,monospace" font-size="10" fill="#5a8ab0" text-anchor="middle" dominant-baseline="middle">Identity Provider</text>
+  </g>
+
+  <!-- ─── ROW 2 ─── Identity Event Bus  cx=412  y=260..350 ─── -->
+
+  <g class="node-ibus" style="opacity:0;transition:opacity 0.5s 0.45s">
+    <rect class="node-glow" x="288" y="260" width="248" height="90" rx="14" fill="#0055aa" style="animation-delay:0.2s"/>
+    <rect x="292" y="264" width="240" height="82" rx="12" fill="url(#gradIBus)" stroke="#1a4a8a" stroke-width="1.5"/>
+    <line x1="312" y1="302" x2="512" y2="302" stroke="#1a3a60" stroke-width="1" stroke-dasharray="4,4"/>
+    <text x="412" y="288" font-family="Syne,sans-serif" font-weight="700" font-size="18" text-anchor="middle" dominant-baseline="middle">&#x1F4E1;</text>
+    <text x="412" y="310" font-family="Syne,sans-serif" font-weight="700" font-size="13" fill="#e8f4ff" text-anchor="middle" dominant-baseline="middle">Identity Event Bus</text>
+    <text x="412" y="328" font-family="JetBrains Mono,monospace" font-size="10" fill="#5a8ab0" text-anchor="middle" dominant-baseline="middle">Async Event Streaming</text>
+  </g>
+
+  <!-- ─── ROW 3 ─── Business Intelligence  cx=412  y=420..510 ─── -->
+
+  <g class="node-bi" style="opacity:0;transition:opacity 0.5s 0.6s">
+    <rect class="node-glow" x="308" y="420" width="208" height="90" rx="14" fill="#004488" style="animation-delay:0.7s"/>
+    <rect x="312" y="424" width="200" height="82" rx="12" fill="url(#gradBI)" stroke="#1a3a6a" stroke-width="1.5"/>
+    <text x="412" y="450" font-family="Syne,sans-serif" font-weight="700" font-size="20" text-anchor="middle" dominant-baseline="middle">&#x1F4CA;</text>
+    <text x="412" y="472" font-family="Syne,sans-serif" font-weight="700" font-size="13" fill="#e8f4ff" text-anchor="middle" dominant-baseline="middle">Business Intelligence</text>
+    <text x="412" y="490" font-family="JetBrains Mono,monospace" font-size="10" fill="#5a8ab0" text-anchor="middle" dominant-baseline="middle">Analytics &amp; Insights</text>
+  </g>
+
+  <!-- ─── PATHS ─── -->
+
+  <!-- Path 1: MyPru → CIAM Services (y=125) -->
+  <path id="path1" d="M 168 125 L 332 125" fill="none" stroke="#2a7fff" stroke-width="2.5"
+    stroke-linecap="round" stroke-dasharray="7,4" marker-end="url(#arrow-blue)" filter="url(#glow-blue)">
+    <animate attributeName="stroke-dashoffset" from="200" to="0" dur="1.5s" repeatCount="indefinite"/>
+  </path>
+  <text id="lbl1" x="250" y="113" font-family="JetBrains Mono,monospace" font-size="10" fill="#4a7fa8" text-anchor="middle" opacity="0" style="transition:opacity 0.4s">Registers Account</text>
+  <circle r="5" fill="#2a7fff" filter="url(#glow-blue)" opacity="0">
+    <animate attributeName="opacity" values="0;1;1;0" dur="2s" repeatCount="indefinite" begin="0s"/>
+    <animateMotion dur="2s" repeatCount="indefinite" begin="0s"><mpath href="#path1"/></animateMotion>
+  </circle>
+
+  <!-- Path 2: CIAM Services → IdP — label: Registers Account -->
+  <path id="path2" d="M 508 125 L 662 125" fill="none" stroke="#2a7fff" stroke-width="2.5"
+    stroke-linecap="round" stroke-dasharray="7,4" marker-end="url(#arrow-blue)" filter="url(#glow-blue)">
+    <animate attributeName="stroke-dashoffset" from="200" to="0" dur="1.5s" repeatCount="indefinite"/>
+  </path>
+  <text id="lbl2" x="585" y="113" font-family="JetBrains Mono,monospace" font-size="10" fill="#4a7fa8" text-anchor="middle" opacity="0" style="transition:opacity 0.4s">Registers Account</text>
+  <circle r="5" fill="#2a7fff" filter="url(#glow-blue)" opacity="0">
+    <animate attributeName="opacity" values="0;1;1;0" dur="2s" repeatCount="indefinite" begin="0.6s"/>
+    <animateMotion dur="2s" repeatCount="indefinite" begin="0.6s"><mpath href="#path2"/></animateMotion>
+  </circle>
+
+  <!-- Path 3: CIAM Services → Identity Event Bus (vertical, x=420) -->
+  <path id="path3" d="M 420 166 L 420 264" fill="none" stroke="#00b8d9" stroke-width="2.5"
+    stroke-linecap="round" stroke-dasharray="7,4" marker-end="url(#arrow-cyan)" filter="url(#glow-blue)">
+    <animate attributeName="stroke-dashoffset" from="150" to="0" dur="1.2s" repeatCount="indefinite"/>
+  </path>
+  <text id="lbl3" x="448" y="217" font-family="JetBrains Mono,monospace" font-size="10" fill="#4a7fa8" text-anchor="start" opacity="0" style="transition:opacity 0.4s">Publishes Event</text>
+  <circle r="5" fill="#00b8d9" opacity="0">
+    <animate attributeName="opacity" values="0;1;1;0" dur="1.8s" repeatCount="indefinite" begin="0.3s"/>
+    <animateMotion dur="1.8s" repeatCount="indefinite" begin="0.3s"><mpath href="#path3"/></animateMotion>
+  </circle>
+
+  <!-- Path 4: Identity Event Bus → Business Intelligence (vertical, x=412) -->
+  <path id="path4" d="M 412 346 L 412 424" fill="none" stroke="#00d4aa" stroke-width="2.5"
+    stroke-linecap="round" stroke-dasharray="7,4" marker-end="url(#arrow-teal)" filter="url(#glow-blue)">
+    <animate attributeName="stroke-dashoffset" from="150" to="0" dur="1.2s" repeatCount="indefinite"/>
+  </path>
+  <text id="lbl4" x="440" y="387" font-family="JetBrains Mono,monospace" font-size="10" fill="#4a7fa8" text-anchor="start" opacity="0" style="transition:opacity 0.4s">Streams Events</text>
+  <circle r="5" fill="#00d4aa" opacity="0">
+    <animate attributeName="opacity" values="0;1;1;0" dur="1.8s" repeatCount="indefinite" begin="0.9s"/>
+    <animateMotion dur="1.8s" repeatCount="indefinite" begin="0.9s"><mpath href="#path4"/></animateMotion>
+  </circle>
+
+  <!-- Legend -->
+  <g transform="translate(24,528)">
+    <line x1="0" y1="6" x2="22" y2="6" stroke="#2a7fff" stroke-width="2" stroke-dasharray="5,3"/>
+    <circle cx="11" cy="6" r="3.5" fill="#2a7fff"/>
+    <text x="28" y="10" font-family="JetBrains Mono,monospace" font-size="9" fill="#3a6a9a">Sync / Auth Flow</text>
+    <line x1="148" y1="6" x2="170" y2="6" stroke="#00b8d9" stroke-width="2" stroke-dasharray="5,3"/>
+    <circle cx="159" cy="6" r="3.5" fill="#00b8d9"/>
+    <text x="176" y="10" font-family="JetBrains Mono,monospace" font-size="9" fill="#3a6a9a">Event Publish</text>
+    <line x1="278" y1="6" x2="300" y2="6" stroke="#00d4aa" stroke-width="2" stroke-dasharray="5,3"/>
+    <circle cx="289" cy="6" r="3.5" fill="#00d4aa"/>
+    <text x="306" y="10" font-family="JetBrains Mono,monospace" font-size="9" fill="#3a6a9a">Event Stream</text>
+  </g>
+</svg>
+</div>
+<script>
+// All nodes and paths start hidden
+const nodes = ['.node-mypru','.node-ciam','.node-idp','.node-ibus','.node-bi'];
+nodes.forEach(sel => {
+  const el = document.querySelector(sel);
+  if (el) el.style.opacity = 0;
+});
+
+// Paths and their balls also start hidden
+['path1','path2','path3','path4'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.style.opacity = 0;
+});
+// Hide all circles (balls) — re-enable per stage
+document.querySelectorAll('circle[r="5"]').forEach(c => {
+  c.style.display = 'none';
+});
+
+// Show a node with fade
+function showNode(sel) {
+  const el = document.querySelector(sel);
+  if (el) el.style.opacity = 1;
+}
+
+// Show a path (line + label text)
+function showPath(id) {
+  const el = document.getElementById(id);
+  if (el) el.style.opacity = 1;
+}
+
+// Activate balls on a path — find the circles that follow that path
+function showBalls(pathId) {
+  document.querySelectorAll('circle[r="5"]').forEach(c => {
+    const mpath = c.querySelector('mpath');
+    if (mpath && mpath.getAttribute('href') === '#' + pathId) {
+      c.style.display = '';
+    }
+  });
+}
+
+// Ball travel time in ms for each path (based on SVG animate dur)
+// path1,2: dur=2s  path3,4: dur=1.8s
+const ballDur = { path1: 2000, path2: 2000, path3: 1800, path4: 1800 };
+
+async function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+async function runSequence() {
+  // 1. MyPru appears
+  await wait(300);
+  showNode('.node-mypru');
+
+  // 2. Path1 + label appear, ball fires — wait one ball duration then reveal CIAM
+  await wait(500);
+  showPath('path1');
+  document.getElementById('lbl1').style.opacity = 1;
+  showBalls('path1');
+  await wait(ballDur.path1);
+  showNode('.node-ciam');
+
+  // 3. Path2 + label appear, ball fires — wait then reveal IdP
+  await wait(300);
+  showPath('path2');
+  document.getElementById('lbl2').style.opacity = 1;
+  showBalls('path2');
+  await wait(ballDur.path2);
+  showNode('.node-idp');
+
+  // 4. Path3 + label appear, ball fires — wait then reveal Event Bus
+  await wait(300);
+  showPath('path3');
+  document.getElementById('lbl3').style.opacity = 1;
+  showBalls('path3');
+  await wait(ballDur.path3);
+  showNode('.node-ibus');
+
+  // 5. Path4 + label appear, ball fires — wait then reveal BI
+  await wait(300);
+  showPath('path4');
+  document.getElementById('lbl4').style.opacity = 1;
+  showBalls('path4');
+  await wait(ballDur.path4);
+  showNode('.node-bi');
+}
+
+runSequence();
+</script>
+</body>
+</html>
