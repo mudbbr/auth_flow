@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SENTRY — IAM Services AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{min-height:100vh;}
+@keyframes pulse-sentry{0%,100%{box-shadow:0 0 28px #22d3ee55,0 0 60px #22d3ee18;}50%{box-shadow:0 0 48px #22d3ee99,0 0 100px #22d3ee30;}}
+@keyframes fade-in-up{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+@keyframes ring-spin{to{transform:translate(-50%,-50%) rotate(360deg);}}
+@keyframes ring-spin-rev{to{transform:translate(-50%,-50%) rotate(-360deg);}}
+@keyframes dot-blink{0%,100%{opacity:1;}50%{opacity:.2;}}
+@keyframes flow-dash{to{stroke-dashoffset:-20;}}
+@keyframes badge-pop{from{opacity:0;transform:scale(.6);}to{opacity:1;transform:scale(1);}}
+@keyframes ticker-fade{0%{opacity:0;transform:translateY(6px);}15%{opacity:1;transform:translateY(0);}85%{opacity:1;transform:translateY(0);}100%{opacity:0;transform:translateY(-6px);}}
+@keyframes layer-pulse{0%,100%{opacity:.5;}50%{opacity:1;}}
+
+#root{
+font-family:‘DM Mono’,‘Courier New’,monospace;
+background:#060d1a;
+min-height:100vh;
+color:#e2e8f0;
+padding:40px 52px;
+position:relative;
+overflow-x:hidden;
+}
+@media(max-width:700px){#root{padding:20px 14px;}}
+#grid-bg{
+position:fixed;inset:0;
+background-image:linear-gradient(rgba(34,211,238,0.022) 1px,transparent 1px),linear-gradient(90deg,rgba(34,211,238,0.022) 1px,transparent 1px);
+background-size:48px 48px;
+pointer-events:none;z-index:0;
+}
+</style>
+
+</head>
+<body>
+<div id="grid-bg"></div>
+<div id="root"></div>
+<script>
+var SIGNALS = [
+  {id:"create",    icon:"&#10022;", label:"Identity Creation",      color:"#22d3ee", angle:-90},
+  {id:"profile",   icon:"&#9635;",  label:"Profile & Entitlements", color:"#a78bfa", angle:-30},
+  {id:"authn",     icon:"&#9679;",  label:"Authentication",         color:"#34d399", angle: 30},
+  {id:"challenge", icon:"&#11041;", label:"Challenges & MFA",       color:"#fbbf24", angle: 90},
+  {id:"risk",      icon:"&#9651;",  label:"Risk & Fraud",           color:"#f87171", angle:150},
+  {id:"lifecycle", icon:"&#8635;",  label:"Lifecycle Events",       color:"#fb923c", angle:210},
+];
+
+var TEAMS = [
+{id:“helpdesk”, icon:”◍”, label:“Help Desk”,            color:”#22d3ee”, tagline:“Resolve faster”,         caps:[“Full identity timeline at a glance”,“Last login, device & location”,“Spot account lockout root cause”,“Reduce mean time to resolve”]},
+{id:“css”,      icon:”◈”, label:“Customer Success”,     color:”#a78bfa”, tagline:“Know your customer”,      caps:[“Customer journey in one view”,“Proactive friction detection”,“Entitlement history & usage”,“Personalised support context”]},
+{id:“ops”,      icon:”⬡”,label:“Operations”,           color:”#34d399”, tagline:“Stay ahead of incidents”, caps:[“Real-time auth health signals”,“MFA failure rate monitoring”,“Policy drift & compliance alerts”,“Automated anomaly escalation”]},
+{id:“bi”,       icon:”▲”, label:“Business Intelligence”,color:”#fbbf24”, tagline:“Signals into strategy”,   caps:[“Identity lifecycle trend reports”,“Login success / failure analytics”,“Risk pattern segmentation”,“Executive-ready dashboards”]},
+];
+
+var INSIGHTS = [
+“Risk score elevated · 3 consecutive MFA failures”,
+“New device detected · London, UK · first seen”,
+“Entitlement gap · API Access unused 90+ days”,
+“Anomalous login hour · 03:14 UTC · flagged”,
+“Identity age 4yr · Trust score 94 / 100”,
+“Tier upgraded · Standard → Enterprise · 2021”,
+];
+
+var CAPS = [
+{icon:”◍”, label:“Identity Insights”,    desc:“Deep visibility into every identity’s full history and state”,      color:”#22d3ee”},
+{icon:”△”, label:“Anomaly Analysis”,      desc:“Spot unusual patterns across authentication, access and behaviour”, color:”#f87171”},
+{icon:”◈”, label:“Risk Intelligence”,     desc:“Understand risk context from fragmented signals in one view”,       color:”#fbbf24”},
+{icon:”▣”, label:“Proactive Alerts”,      desc:“Surface issues to teams before they become incidents”,              color:”#34d399”},
+{icon:”↻”, label:“Lifecycle Tracking”,    desc:“Watch identity journeys from creation through every change”,       color:”#a78bfa”},
+{icon:”✦”,label:“Executive Reporting”,   desc:“Trends, health scores and BI-ready identity analytics”,            color:”#fb923c”},
+{icon:”●”, label:“Behavioural Patterns”,  desc:“Learn what normal looks like — and flag when it drifts”,    color:”#60a5fa”},
+{icon:”⬡”,label:“Team Intelligence”,     desc:“Right insight to the right team — Help Desk, Ops, CSS, BI”, color:”#e2e8f0”},
+];
+
+var active = {};
+var selectedTeam = null;
+var tickIdx = 0;
+var tickTimer = null;
+
+function mob(){ return window.innerWidth < 700; }
+
+function toggleSignal(id){
+if(active[id]) delete active[id]; else active[id]=true;
+tickIdx=0; stopTicker(); render();
+}
+function connectAll(){
+for(var i=0;i<SIGNALS.length;i++) active[SIGNALS[i].id]=true;
+tickIdx=0; stopTicker(); render();
+}
+function resetAll(){
+active={}; tickIdx=0; stopTicker(); render();
+}
+function toggleTeam(id){
+selectedTeam = selectedTeam===id ? null : id; render();
+}
+function activeCount(){ return Object.keys(active).length; }
+function allOn(){ return activeCount()===SIGNALS.length; }
+
+function stopTicker(){ if(tickTimer){clearInterval(tickTimer);tickTimer=null;} }
+function startTicker(){
+stopTicker();
+if(activeCount()===0) return;
+tickTimer = setInterval(function(){ tickIdx++; renderInsight(); }, 2600);
+}
+
+function renderInsight(){
+var m=mob(), cnt=activeCount(), ao=allOn();
+var wrap = document.getElementById(‘insight-wrap’);
+var dot  = document.getElementById(‘idot’);
+var txt  = document.getElementById(‘itext’);
+var cnt2 = document.getElementById(‘icnt’);
+var bar  = document.getElementById(‘ibar’);
+if(!wrap) return;
+wrap.style.border = ‘1px solid ‘+(ao?‘rgba(34,211,238,.27)’:’#1a2540’);
+dot.style.background = cnt>0?’#22d3ee’:’#1a2540’;
+dot.style.animation  = cnt>0?‘dot-blink 1.2s ease infinite’:‘none’;
+if(cnt>0){
+txt.style.color=’#94a3b8’;
+txt.innerHTML=’<span style="display:inline-block;animation:ticker-fade 2.6s ease;">’+INSIGHTS[tickIdx%INSIGHTS.length]+’</span>’;
+} else {
+txt.style.color=’#1e2d45’;
+txt.innerHTML=‘Connect signals to begin synthesizing insights…’;
+}
+cnt2.style.color=cnt>0?’#22d3ee’:’#1e2d45’;
+cnt2.textContent=cnt+’/’+SIGNALS.length;
+bar.style.width=((cnt/SIGNALS.length)*100)+’%’;
+bar.style.boxShadow=cnt>0?‘0 0 8px #22d3ee88’:‘none’;
+}
+
+function render(){
+var m=mob(), cnt=activeCount(), ao=allOn();
+var SIGNAL_R=m?130:178, BUS_R=m?72:98, LAKE_R=m?48:65, SENTRY_R=m?28:38;
+var CX=m?175:240, CY=m?175:240;
+var W=CX*2, H=CY*2;
+var NW=m?54:68, NH=m?46:58;
+
+// SVG content
+var svg = ‘’;
+svg += ‘<defs>’;
+svg += ‘<radialGradient id="bus-fill" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#fb923c" stop-opacity=".12"/><stop offset="100%" stop-color="#fb923c" stop-opacity=".03"/></radialGradient>’;
+svg += ‘<radialGradient id="lake-fill" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#a78bfa" stop-opacity=".14"/><stop offset="100%" stop-color="#a78bfa" stop-opacity=".03"/></radialGradient>’;
+svg += ‘<radialGradient id="sentry-fill" cx="40%" cy="36%" r="60%"><stop offset="0%" stop-color="#0d3050" stop-opacity="1"/><stop offset="100%" stop-color="#060d1a" stop-opacity="1"/></radialGradient>’;
+svg += ‘</defs>’;
+svg += ‘<circle cx="'+CX+'" cy="'+CY+'" r="'+SIGNAL_R+'" fill="none" stroke="#1a2540" stroke-width="1" stroke-dasharray="3 7"/>’;
+svg += ‘<circle cx="'+CX+'" cy="'+CY+'" r="'+BUS_R+'" fill="url(#bus-fill)" stroke="#fb923c" stroke-width="1.5" stroke-dasharray="6 4" style="animation:layer-pulse 2.8s ease-in-out infinite"/>’;
+svg += ‘<circle cx="'+CX+'" cy="'+CY+'" r="'+LAKE_R+'" fill="url(#lake-fill)" stroke="#a78bfa" stroke-width="1.5" style="animation:layer-pulse 3.4s .4s ease-in-out infinite"/>’;
+svg += ‘<circle cx="'+CX+'" cy="'+CY+'" r="'+SENTRY_R+'" fill="url(#sentry-fill)" stroke="#22d3ee" stroke-width="2"/>’;
+
+for(var i=0;i<SIGNALS.length;i++){
+var s=SIGNALS[i];
+var rad=s.angle*Math.PI/180;
+var nx=CX+SIGNAL_R*Math.cos(rad), ny=CY+SIGNAL_R*Math.sin(rad);
+var bx=CX+BUS_R*Math.cos(rad),   by=CY+BUS_R*Math.sin(rad);
+var lx=CX+LAKE_R*Math.cos(rad),  ly=CY+LAKE_R*Math.sin(rad);
+var on=active[s.id]?true:false;
+svg += ‘<line x1="'+nx.toFixed(1)+'" y1="'+ny.toFixed(1)+'" x2="'+bx.toFixed(1)+'" y2="'+by.toFixed(1)+'" stroke="'+(on?s.color:'#1a2540')+'" stroke-width="'+(on?1.5:1)+'" stroke-dasharray="'+(on?'5 3':'2 6')+'" opacity="'+(on?1:.25)+'" style="'+(on?'animation:flow-dash .7s linear infinite':'')+'"/>’;
+svg += ‘<line x1="'+bx.toFixed(1)+'" y1="'+by.toFixed(1)+'" x2="'+lx.toFixed(1)+'" y2="'+ly.toFixed(1)+'" stroke="#a78bfa" stroke-width="1" stroke-dasharray="3 4" opacity="'+(on?.6:0)+'" style="'+(on?'animation:flow-dash 1s linear infinite':'')+'"/>’;
+}
+
+// spinning rings
+var spins = ‘’;
+var spinDefs = [[1.0,14,‘ring-spin’,‘rgba(34,211,238,.13)’],[0.7,22,‘ring-spin-rev’,‘rgba(34,211,238,.08)’]];
+for(var j=0;j<spinDefs.length;j++){
+var sd=spinDefs[j], sz=(m?56:76)*sd[0];
+spins += ‘<div style="position:absolute;top:50%;left:50%;width:'+sz+'px;height:'+sz+'px;border-radius:50%;border:1px solid '+sd[3]+';transform:translate(-50%,-50%);animation:'+sd[2]+' '+sd[1]+'s linear infinite;z-index:2;pointer-events:none;"></div>’;
+}
+
+// sentry label
+var slW=m?54:74;
+var badge = cnt>0 ? ‘<div style="position:absolute;top:-5px;right:-5px;width:14px;height:14px;border-radius:50%;background:#22d3ee;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:900;color:#060d1a;animation:badge-pop .25s ease;z-index:6;">’+cnt+’</div>’ : ‘’;
+var sentryLbl = ‘<div style="position:absolute;top:50%;left:50%;width:'+slW+'px;height:'+slW+'px;border-radius:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;justify-content:center;animation:pulse-sentry 3s ease-in-out infinite;z-index:5;pointer-events:none;">’
++’<div style="font-size:'+(m?9:11)+'px;font-weight:800;color:#22d3ee;font-family:\'Syne\',sans-serif;letter-spacing:.06em;line-height:1;">SENTRY</div>’
++’<div style="width:'+(m?22:28)+'px;height:1px;background:#22d3ee44;margin:3px 0;"></div>’
++’<div style="font-size:'+(m?6:7)+'px;color:#475569;letter-spacing:.08em;text-align:center;line-height:1.4;font-family:\'DM Mono\',monospace;">IAM<br>SERVICES AI</div>’
++badge
++’</div>’;
+
+// ring labels
+var lblBus  = ‘<div style="position:absolute;top:'+(CY-BUS_R-(m?14:18))+'px;left:50%;transform:translateX(-50%);z-index:6;pointer-events:none;"><div style="font-size:'+(m?7:8)+'px;color:#fb923c;letter-spacing:.12em;font-family:\'DM Mono\',monospace;background:#060d1a;padding:1px 6px;border-radius:2px;border:1px solid rgba(251,146,60,.2);white-space:nowrap;">EVENT BUS</div></div>’;
+var lblLake = ‘<div style="position:absolute;top:'+(CY-LAKE_R-(m?14:18))+'px;left:50%;transform:translateX(-50%);z-index:6;pointer-events:none;"><div style="font-size:'+(m?7:8)+'px;color:#a78bfa;letter-spacing:.12em;font-family:\'DM Mono\',monospace;background:#060d1a;padding:1px 6px;border-radius:2px;border:1px solid rgba(167,139,250,.2);white-space:nowrap;">DATA LAKE</div></div>’;
+
+// signal nodes
+var nodes=’’;
+for(var i=0;i<SIGNALS.length;i++){
+var s=SIGNALS[i];
+var rad=s.angle*Math.PI/180;
+var nx=CX+SIGNAL_R*Math.cos(rad), ny=CY+SIGNAL_R*Math.sin(rad);
+var on=active[s.id]?true:false;
+nodes += ‘<div onclick="toggleSignal(\''+s.id+'\')" style="position:absolute;left:'+(nx-NW/2).toFixed(1)+'px;top:'+(ny-NH/2).toFixed(1)+'px;width:'+NW+'px;height:'+NH+'px;background:'+(on?s.color+'18':'#08111f')+';border:1.5px solid '+(on?s.color:'#1a2540')+';border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;z-index:4;box-shadow:'+(on?'0 0 14px '+s.color+'55':'none')+';">’
++’<span style="font-size:'+(m?13:16)+'px;color:'+(on?s.color:'#334155')+';transition:color .2s;">’+s.icon+’</span>’
++’<span style="font-size:'+(m?6:7)+'px;color:'+(on?s.color:'#2a3a52')+';text-align:center;line-height:1.3;padding:0 3px;font-family:\'DM Mono\',monospace;letter-spacing:.02em;margin-top:2px;">’+s.label+’</span>’
++’</div>’;
+}
+
+// layer legend
+var legend=’<div style="position:absolute;bottom:'+(m?4:8)+'px;right:'+(m?4:8)+'px;display:flex;flex-direction:column;gap:4px;z-index:6;">’;
+var ll=[{color:”#22d3ee”,label:“SENTRY”},{color:”#a78bfa”,label:“DATA LAKE”},{color:”#fb923c”,label:“EVENT BUS”}];
+for(var i=0;i<ll.length;i++){
+legend+=’<div style="display:flex;align-items:center;gap:5px;"><div style="width:6px;height:6px;border-radius:50%;background:'+ll[i].color+';box-shadow:0 0 5px '+ll[i].color+';"></div><span style="font-size:'+(m?7:8)+'px;color:#334155;letter-spacing:.08em;font-family:\'DM Mono\',monospace;">’+ll[i].label+’</span></div>’;
+}
+legend+=’</div>’;
+
+// team cards
+var teamGrid=’’;
+for(var i=0;i<TEAMS.length;i++){
+var t=TEAMS[i], on=selectedTeam===t.id;
+var caps=’’;
+if(on){
+caps=’<div style="display:flex;flex-direction:column;gap:5px;border-top:1px solid '+t.color+'33;padding-top:10px;margin-top:10px;animation:fade-in-up .2s ease;">’;
+for(var k=0;k<t.caps.length;k++){
+caps+=’<div style="display:flex;gap:6px;align-items:flex-start;"><div style="width:4px;height:4px;border-radius:50%;background:'+t.color+';flex-shrink:0;margin-top:4px;"></div><span style="font-size:'+(m?9:10)+'px;color:#64748b;line-height:1.4;">’+t.caps[k]+’</span></div>’;
+}
+caps+=’</div>’;
+}
+teamGrid+=’<div onclick="toggleTeam(\''+t.id+'\')" style="background:'+(on?t.color+'12':'#08111f')+';border:1.5px solid '+(on?t.color:'#1a2540')+';border-radius:10px;padding:'+(m?'11px 10px':'14px 16px')+';cursor:pointer;transition:all .25s;box-shadow:'+(on?'0 0 20px '+t.color+'33':'none')+';animation:fade-in-up .4s '+(i*.08)+'s ease both;">’
++’<div style="font-size:'+(m?20:24)+'px;color:'+(on?t.color:'#2a3a52')+';margin-bottom:6px;transition:color .2s;">’+t.icon+’</div>’
++’<div style="font-size:'+(m?11:13)+'px;font-weight:700;color:'+(on?t.color:'#94a3b8')+';font-family:\'Syne\',sans-serif;margin-bottom:2px;">’+t.label+’</div>’
++’<div style="font-size:'+(m?8:9)+'px;color:#334155;letter-spacing:.05em;">’+t.tagline+’</div>’
++caps
++’</div>’;
+}
+
+// capability cards (only when allOn)
+var capCards=’’;
+if(ao){
+for(var i=0;i<CAPS.length;i++){
+var c=CAPS[i];
+capCards+=’<div style="background:#060d1a;border:1px solid '+c.color+'33;border-radius:7px;padding:'+(m?'9px 10px':'11px 14px')+';animation:fade-in-up .35s '+(i*.05)+'s ease both;">’
++’<div style="display:flex;align-items:center;gap:7px;margin-bottom:4px;">’
++’<span style="font-size:13px;color:'+c.color+';">’+c.icon+’</span>’
++’<span style="font-family:\'Syne\',sans-serif;font-size:'+(m?10:11)+'px;font-weight:700;color:#cbd5e1;">’+c.label+’</span>’
++’</div>’
++’<div style="font-size:'+(m?8:9)+'px;color:#475569;line-height:1.5;">’+c.desc+’</div>’
++’</div>’;
+}
+}
+
+// banner
+var banner=’<div style="margin-top:'+(m?16:20)+'px;background:'+(ao?'linear-gradient(135deg,#071f30,#0a0d1a)':'#07111f')+';border:1px solid '+(ao?'rgba(34,211,238,.33)':'#1a2540')+';border-radius:10px;padding:'+(m?'14px':'20px 24px')+';transition:all .5s;box-shadow:'+(ao?'0 0 40px rgba(34,211,238,.1)':'none')+';">’
++’<div style="display:flex;align-items:center;gap:'+(m?10:16)+'px;'+(ao?'margin-bottom:16px;':'')+'flex-wrap:wrap;">’
++’<div style="font-size:'+(m?24:30)+'px;flex-shrink:0;color:'+(ao?'#22d3ee':'#1e2d45')+';transition:color .4s;">✦</div>’
++’<div style="flex:1;min-width:180px;">’
++’<div style="font-size:'+(m?12:14)+'px;font-weight:700;font-family:\'Syne\',sans-serif;color:'+(ao?'#e2e8f0':'#334155')+';margin-bottom:3px;transition:color .4s;">’+(ao?‘SENTRY is watching — insights ready’:‘Connect all signals to activate SENTRY’)+’</div>’
++’<div style="font-size:'+(m?9:10)+'px;color:'+(ao?'#64748b':'#1e2d45')+';line-height:1.6;transition:color .4s;">’+(ao?‘SENTRY watches over your unified identity data — surfacing insights, detecting patterns and delivering proactive intelligence to every team.’:‘Synthesize all identity signals so SENTRY can watch over the full picture.’)+’</div>’
++’</div></div>’
++(ao?’<div style="display:grid;grid-template-columns:'+(m?'1fr 1fr':'repeat(4,1fr)')+';gap:'+(m?8:10)+'px;animation:fade-in-up .4s ease;">’+capCards+’</div>’:’’)
++’</div>’;
+
+// flow legend items
+var flowItems = [
+{label:“Identity Signals”,color:”#64748b”,icon:”○”},
+{label:”→”,color:”#1e2d45”,icon:null},
+{label:“Event Bus”,color:”#fb923c”,icon:”⬡”},
+{label:”→”,color:”#1e2d45”,icon:null},
+{label:“Data Lake”,color:”#a78bfa”,icon:”▣”},
+{label:”→”,color:”#1e2d45”,icon:null},
+{label:“SENTRY AI”,color:”#22d3ee”,icon:”✦”,bold:true},
+];
+var flowHtml=’’;
+for(var i=0;i<flowItems.length;i++){
+var fi=flowItems[i];
+flowHtml+=’<div style="display:flex;align-items:center;gap:5px;">’+(fi.icon?’<span style="font-size:10px;color:'+fi.color+';">’+fi.icon+’</span>’:’’)+’<span style="font-size:'+(m?8:9)+'px;color:'+fi.color+';letter-spacing:.1em;'+(fi.bold?'font-weight:700;':'')+'">’+fi.label+’</span></div>’;
+}
+
+var resetBtn = cnt>0 ? ‘<button onclick="resetAll()" style="font-family:\'DM Mono\',monospace;font-size:9px;color:#475569;background:transparent;border:1px solid #1a2540;padding:4px 10px;border-radius:3px;cursor:pointer;letter-spacing:.08em;">RESET</button>’ : ‘’;
+
+var html = ‘’
+// header
++’<div style="position:relative;z-index:1;margin-bottom:'+(m?24:36)+'px;animation:fade-in-up .5s ease;">’
++’<span style="font-size:9px;letter-spacing:.22em;color:#22d3ee;background:rgba(34,211,238,.07);border:1px solid rgba(34,211,238,.2);padding:3px 12px;border-radius:2px;display:inline-block;margin-bottom:12px;">SENTRY — IAM SERVICES AI</span>’
++’<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;">’
++’<div><h1 style="font-family:\'Syne\',sans-serif;font-size:'+(m?19:26)+'px;font-weight:800;margin:0 0 6px;background:linear-gradient(135deg,#f1f5f9,#64748b);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1.2;">Synthesize Customer Identity Data</h1>’
++’<p style="font-size:'+(m?11:12)+'px;color:#475569;margin:0;max-width:520px;line-height:1.7;">Every identity signal flows into a central Event Bus, lands in a unified Data Lake, and surfaces through SENTRY — IAM Services AI</p></div>’
++’<div style="display:flex;gap:6px;flex-shrink:0;">’+resetBtn+’<button onclick="connectAll()" style="font-family:\'DM Mono\',monospace;font-size:9px;color:#22d3ee;background:rgba(34,211,238,.07);border:1px solid rgba(34,211,238,.3);padding:4px 10px;border-radius:3px;cursor:pointer;letter-spacing:.08em;">CONNECT ALL</button></div>’
++’</div></div>’
+// flow legend
++’<div style="position:relative;z-index:1;display:flex;align-items:center;justify-content:center;gap:'+(m?8:16)+'px;margin-bottom:'+(m?12:18)+'px;flex-wrap:wrap;">’+flowHtml+’</div>’
+// step label
++’<div style="position:relative;z-index:1;text-align:center;margin-bottom:8px;"><span style="font-size:9px;letter-spacing:.18em;color:#334155;">TAP EACH SIGNAL TO FLOW INTO THE ARCHITECTURE</span></div>’
+// radial
++’<div style="display:flex;justify-content:center;position:relative;z-index:1;">’
++’<div style="position:relative;width:'+W+'px;height:'+H+'px;">’
++’<svg width="'+W+'" height="'+H+'" style="position:absolute;inset:0;overflow:visible;z-index:1;">’+svg+’</svg>’
++spins+sentryLbl+lblBus+lblLake+nodes+legend
++’</div></div>’
+// insight bar
++’<div style="position:relative;z-index:1;max-width:560px;margin:0 auto;margin-top:'+(m?14:18)+'px;margin-bottom:'+(m?24:32)+'px;">’
++’<div id="insight-wrap" style="background:#07111f;border:1px solid '+(ao?'rgba(34,211,238,.27)':'#1a2540')+';border-radius:8px;padding:10px 16px;display:flex;align-items:center;gap:10px;transition:border-color .4s;">’
++’<div id="idot" style="width:6px;height:6px;border-radius:50%;flex-shrink:0;background:'+(cnt>0?'#22d3ee':'#1a2540')+';'+(cnt>0?'animation:dot-blink 1.2s ease infinite;':'')+'transition:background .3s;"></div>’
++’<div id="itext" style="flex:1;font-size:'+(m?9:10)+'px;color:'+(cnt>0?'#94a3b8':'#1e2d45')+';font-family:\'DM Mono\',monospace;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;transition:color .3s;">’+(cnt>0?’<span style="display:inline-block;animation:ticker-fade 2.6s ease;">’+INSIGHTS[tickIdx%INSIGHTS.length]+’</span>’:‘Connect signals to begin synthesizing insights…’)+’</div>’
++’<div id="icnt" style="font-size:9px;color:'+(cnt>0?'#22d3ee':'#1e2d45')+';letter-spacing:.1em;flex-shrink:0;transition:color .3s;">’+cnt+’/’+SIGNALS.length+’</div>’
++’</div>’
++’<div style="height:2px;background:#0d1829;border-radius:2px;margin-top:6px;overflow:hidden;">’
++’<div id="ibar" style="height:100%;width:'+((cnt/SIGNALS.length)*100)+'%;background:linear-gradient(90deg,#fb923c,#a78bfa,#22d3ee);border-radius:2px;transition:width .5s ease;box-shadow:'+(cnt>0?'0 0 8px #22d3ee88':'none')+';"></div>’
++’</div></div>’
+// teams
++’<div style="position:relative;z-index:1;">’
++’<div style="font-size:9px;letter-spacing:.18em;color:#334155;margin-bottom:10px;display:flex;align-items:center;gap:8px;"><div style="flex:1;height:1px;background:linear-gradient(90deg,#334155,transparent);"></div>SENTRY EMPOWERS THESE TEAMS · TAP TO EXPLORE<div style="flex:1;height:1px;background:linear-gradient(270deg,#334155,transparent);"></div></div>’
++’<div style="display:grid;grid-template-columns:'+(m?'1fr 1fr':'repeat(4,1fr)')+';gap:'+(m?8:12)+'px;">’+teamGrid+’</div>’
++banner
++’</div>’
++’<footer style="margin-top:36px;font-size:9px;color:#1e2d45;letter-spacing:.12em;text-align:center;position:relative;z-index:1;">SENTRY · IAM SERVICES AI · SYNTHESIZE → ENRICH → EMPOWER</footer>’;
+
+document.getElementById(‘root’).innerHTML = html;
+startTicker();
+}
+
+var resizeTimer;
+window.addEventListener(‘resize’, function(){
+clearTimeout(resizeTimer);
+resizeTimer = setTimeout(render, 150);
+});
+
+render();
+</script>
+
+</body>
+</html>
