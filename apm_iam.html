@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>App Security Data Model — ServiceNow APM</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+
+  :root {
+    --bg: #0f1419;
+    --panel: #161d26;
+    --panel-border: #2a3441;
+    --parent: #5eb3d6;
+    --child: #d68c5e;
+    --field-key: #e8c766;
+    --text: #d7dee6;
+    --text-dim: #7c8a9a;
+    --line: #445261;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    background-image:
+      radial-gradient(circle at 1px 1px, #1c2530 1px, transparent 0);
+    background-size: 28px 28px;
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    padding: 48px 24px 80px;
+  }
+
+  .wrap { max-width: 1180px; margin: 0 auto; }
+
+  header {
+    margin-bottom: 44px;
+    border-bottom: 1px solid var(--panel-border);
+    padding-bottom: 24px;
+  }
+
+  .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  h1 {
+    font-size: 28px;
+    font-weight: 700;
+    margin: 0 0 8px;
+    letter-spacing: -0.01em;
+  }
+
+  .sub {
+    color: var(--text-dim);
+    font-size: 14.5px;
+    max-width: 640px;
+    line-height: 1.5;
+  }
+
+  .legend {
+    display: flex;
+    gap: 24px;
+    margin-top: 20px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+  }
+  .legend-item { display: flex; align-items: center; gap: 8px; color: var(--text-dim); }
+  .swatch { width: 10px; height: 10px; border-radius: 2px; }
+
+  /* diagram layout */
+  .diagram {
+    position: relative;
+  }
+
+  .row {
+    display: flex;
+    gap: 40px;
+    align-items: flex-start;
+    justify-content: center;
+  }
+
+  .row.parent-row { margin-bottom: 0; }
+
+  .entity {
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: 10px;
+    width: 480px;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  .entity.wide { width: 560px; }
+
+  .entity-head {
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--panel-border);
+  }
+
+  .entity.is-parent .entity-head { border-top: 3px solid var(--parent); }
+  .entity.is-child .entity-head { border-top: 3px solid var(--child); }
+
+  .entity-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .is-parent .entity-tag { color: var(--parent); }
+  .is-child .entity-tag { color: var(--child); }
+
+  .entity-name {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 15px;
+    font-weight: 600;
+    margin-top: 4px;
+    color: #f2f5f8;
+  }
+
+  .entity-desc {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-top: 6px;
+    line-height: 1.4;
+  }
+
+  .fields { padding: 6px 0; }
+
+  .field {
+    display: block;
+    padding: 12px 20px;
+    border-bottom: 1px solid #1d2530;
+  }
+  .field:last-child { border-bottom: none; }
+
+  .field-header {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .field-name {
+    color: var(--field-key);
+    font-weight: 600;
+  }
+
+  .field-type {
+    color: var(--text);
+    font-weight: 400;
+  }
+
+  .field-desc {
+    font-family: 'Inter', sans-serif;
+    font-size: 12.5px;
+    color: var(--text-dim);
+    line-height: 1.5;
+    margin-top: 8px;
+  }
+
+  .section-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    padding: 10px 18px 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  /* connector lines */
+  .connectors {
+    height: 90px;
+    position: relative;
+  }
+  .connectors svg { width: 100%; height: 100%; display: block; }
+
+  .cardinality {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    fill: var(--text-dim);
+  }
+
+  .children-row {
+    display: flex;
+    gap: 40px;
+    justify-content: center;
+  }
+
+  footer {
+    margin-top: 56px;
+    padding-top: 20px;
+    border-top: 1px solid var(--panel-border);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    color: var(--text-dim);
+    line-height: 1.7;
+  }
+  footer strong { color: var(--text); }
+
+  @media (max-width: 860px) {
+    .row, .children-row { flex-direction: column; align-items: center; }
+    .connectors { display: none; }
+    .entity, .entity.wide { width: 100%; max-width: 400px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">ServiceNow APM · CMDB Extension</div>
+    <h1>Application Security Data Model</h1>
+    <div class="sub">One auth profile per application, with unbounded child records for SAML federations and OAuth/OIDC trust relationships — supporting multiple SP/IdP and Relying Party/Authorization Server connections per app.</div>
+    <div class="legend">
+      <div class="legend-item"><span class="swatch" style="background:var(--parent)"></span> Parent CI (1 per app)</div>
+      <div class="legend-item"><span class="swatch" style="background:var(--child)"></span> Child table (many per app, linked to parent)</div>
+    </div>
+  </header>
+
+  <div class="diagram">
+
+    <!-- PARENT ENTITY -->
+    <div class="row parent-row">
+      <div class="entity is-parent wide">
+        <div class="entity-head">
+          <div class="entity-tag">cmdb_ci_appl (extended)</div>
+          <div class="entity-name">cmdb_ci_app_auth_profile</div>
+          <div class="entity-desc">Application Authentication &amp; Authorization Profile. One record per app.</div>
+        </div>
+        <div class="fields">
+          <div class="field">
+            <div class="field-header"><span class="field-name">iam_domain</span>: <span class="field-type">Workforce IAM / Customer IAM</span></div>
+            <div class="field-desc">Which identity population this app serves — employees/contractors (Workforce IAM) or customers/consumers (Customer IAM).</div>
+          </div>
+          <div class="field">
+            <div class="field-header"><span class="field-name">identity_provider</span>: <span class="field-type">PingOne AIC, Azure AD, PingFed…</span></div>
+            <div class="field-desc">The platform that actually authenticates the user and issues tokens/assertions for this app.</div>
+          </div>
+          <div class="field">
+            <div class="field-header"><span class="field-name">authentication_protocol</span>: <span class="field-type">OAuth2.0, SAML 2.0, LDAP…</span></div>
+            <div class="field-desc">The standard used to exchange identity between the app and the IdP.</div>
+          </div>
+          <div class="field">
+            <div class="field-header"><span class="field-name">authentication_flow</span>: <span class="field-type">Auth Code+PKCE, Client Creds…</span></div>
+            <div class="field-desc">The specific sequence of steps used to obtain a token — determines how secure and how automatable the login is.</div>
+          </div>
+          <div class="field">
+            <div class="field-header"><span class="field-name">token_format</span>: <span class="field-type">JWT, SAML Assertion, Opaque</span></div>
+            <div class="field-desc">The shape of the credential issued after authentication — whether it's self-contained (JWT) or a reference the app must validate against the IdP (Opaque).</div>
+          </div>
+          <div class="field">
+            <div class="field-header"><span class="field-name">mfa_required</span>: <span class="field-type">true / false</span></div>
+            <div class="field-desc">Whether a second authentication factor is enforced before access is granted.</div>
+          </div>
+          <div class="field">
+            <div class="field-header"><span class="field-name">principal_type</span>: <span class="field-type">Internal Users, External Users, Service Accounts</span></div>
+            <div class="field-desc">Who or what authenticates to this app — employees, external/customer users, or non-human service accounts.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONNECTORS -->
+    <div class="connectors">
+      <svg viewBox="0 0 1180 90" preserveAspectRatio="none">
+        <!-- trunk down from parent center -->
+        <line x1="590" y1="0" x2="590" y2="30" stroke="var(--line)" stroke-width="1.5"/>
+        <!-- horizontal spread -->
+        <line x1="330" y1="30" x2="850" y2="30" stroke="var(--line)" stroke-width="1.5"/>
+        <!-- down to each child -->
+        <line x1="330" y1="30" x2="330" y2="70" stroke="var(--line)" stroke-width="1.5"/>
+        <line x1="850" y1="30" x2="850" y2="70" stroke="var(--line)" stroke-width="1.5"/>
+        <text x="345" y="55" class="cardinality">1 : many</text>
+        <text x="740" y="55" class="cardinality">1 : many</text>
+      </svg>
+    </div>
+
+    <!-- CHILD ENTITIES -->
+    <div class="children-row">
+      <div class="entity is-child">
+        <div class="entity-head">
+          <div class="entity-tag">child table</div>
+          <div class="entity-name">cmdb_ci_saml_federation</div>
+          <div class="entity-desc">One row per SAML federation partner. Minimal field set: role, partner, entity ID, SSO URL.</div>
+        </div>
+        <div class="fields">
+          <div class="field">
+            <div class="field-header"><span class="field-name">saml_role</span>: <span class="field-type">Service Provider (SP) / Identity Provider (IdP)</span></div>
+            <div class="field-desc">Whether this app relies on the partner to authenticate the user (SP) or authenticates the user and issues the assertion to the partner (IdP).</div>
+          </div>
+          <div class="field">
+            <div class="field-header"><span class="field-name">federation_partner</span>: <span class="field-type">string</span></div>
+            <div class="field-desc">The name of the other party in this SAML relationship (e.g., "Salesforce," "Workday," or another internal app).</div>
+          </div>
+          <div class="field">
+            <div class="field-header"><span class="field-name">entity_id</span>: <span class="field-type">string (SP or IdP issuer)</span></div>
+            <div class="field-desc">The unique SAML identifier for each side of the exchange — your app's ID if you're the SP, or your issuer ID if you're the IdP.</div>
+          </div>
+          <div class="field">
+            <div class="field-header"><span class="field-name">sso_url</span>: <span class="field-type">URL</span></div>
+            <div class="field-desc">Where the authentication handoff happens — the IdP's SSO endpoint you send users to, or the endpoint your app exposes if you are the IdP.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="entity is-child">
+        <div class="entity-head">
+          <div class="entity-tag">child table</div>
+          <div class="entity-name">cmdb_ci_oauth_trust_relationship</div>
+          <div class="entity-desc">One row per OAuth/OIDC trust relationship. Minimal field set: client ID and grant type only.</div>
+        </div>
+        <div class="fields">
+          <div class="field">
+            <div class="field-header"><span class="field-name">client_id</span>: <span class="field-type">string</span></div>
+            <div class="field-desc">The identifier the authorization server issues to this app so it can be recognized when requesting tokens.</div>
+          </div>
+          <div class="field">
+            <div class="field-header"><span class="field-name">grant_type</span>: <span class="field-type">Auth Code+PKCE, Client Creds, Custom</span></div>
+            <div class="field-desc">The OAuth flow this app uses to obtain a token — depends on whether a human user, a service, or a custom process is involved.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <footer>
+    <strong>Notes —</strong><br>
+    · An app that is both SP and IdP simply has multiple <span style="color:var(--child)">cmdb_ci_saml_federation</span> rows with different <span class="field-name" style="display:inline">saml_role</span> values.<br>
+    · Each child table row links back to its parent <span style="color:var(--parent)">cmdb_ci_app_auth_profile</span> record (reference field not shown here for readability), driving a related list on the Application CI form.<br>
+    · Naming follows SAML 2.0, OAuth 2.0 (RFC 6749), and OIDC spec vocabulary rather than generic CRUD labels — keeps the model self-documenting for architects and auditors.<br>
+    · Child tables are intentionally kept lean (only the fields requested) — extend later if reporting or audit needs grow.
+  </footer>
+
+</div>
+</body>
+</html>
