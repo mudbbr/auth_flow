@@ -260,6 +260,14 @@
             <div class="field-header"><span class="field-name">principal_type</span>: <span class="field-type">Internal Users, External Users, Service Accounts</span></div>
             <div class="field-desc">Who or what authenticates to this app — employees, external/customer users, or non-human service accounts.</div>
           </div>
+          <div class="field">
+            <div class="field-header"><span class="field-name">client_type</span>: <span class="field-type">SPA, Server-side Web App, Native/Mobile, Machine-to-Machine</span></div>
+            <div class="field-desc">The OAuth client classification for this app. Determines whether login_experience below even applies — it's only relevant for SPA clients.</div>
+          </div>
+          <div class="field">
+            <div class="field-header"><span class="field-name">login_experience</span>: <span class="field-type">Hosted Login (IdP Redirect) / Embedded Login (Custom UI + IAM API)</span></div>
+            <div class="field-desc">Applies when client_type = SPA. Hosted Login means the app redirects to the IdP's own login page — the app never touches credentials. Embedded Login means the app renders its own login UI and calls IAM APIs directly for a richer, in-app experience — this shifts credential handling and more security responsibility onto the app team.</div>
+          </div>
         </div>
       </div>
     </div>
